@@ -112,17 +112,34 @@
         }
 
         function nextPlayer() {
-            currentPlayer++;
-            if (currentPlayer >= players.length) { showLeaderboard(); prepareNextRound(); }
-            else {
-                throwCount = 0;
-                dice = [null, null, null]; 
-                held = [false, false, false];
-                convertible = [false, false, false];
-                updateDiceDisplay();
-                showPlayer();
-            }
-        }
+    currentPlayer++;
+
+    if (currentPlayer >= players.length) {
+        // Rundensieger ermitteln
+        let list = scores.map((s, i) => ({ name: players[i], playerIndex: i, ...s }));
+
+        list.sort((a, b) => {
+            if (a.tier !== b.tier) return b.tier - a.tier;
+            if (a.subvalue !== b.subvalue) return b.subvalue - a.subvalue;
+            if (a.throws !== b.throws) return a.throws - b.throws;
+            return a.playerIndex - b.playerIndex;
+        });
+
+        wins[list[0].playerIndex]++;
+        localStorage.setItem("schockenWinner", list[0].name);
+
+        prepareNextRound(); // Starte nächste Runde
+        updateHistoryTable(); // Zeige aktualisierte Sieg-Kronen in Tabelle
+    } else {
+        // Nächster Spieler vorbereiten
+        throwCount = 0;
+        dice = [null, null, null];
+        held = [false, false, false];
+        convertible = [false, false, false];
+        updateDiceDisplay();
+        showPlayer();
+    }
+}
 
         function prepareNextRound() {
             throwCount = 0; currentPlayer = 0;
@@ -207,10 +224,8 @@
 
                 // Kopfzeile mit Spielernamen
                 html += "<tr><th rowspan='2'>Runde</th>";
-                players.forEach((name, i) => {
-                const winCount = wins[i];
-                const displayName = winCount > 0 ? `${name} (${winCount} 👑)` : name;
-                html += `<th colspan="2">${displayName}</th>`;
+                players.forEach(name => {
+                    html += `<th colspan="2">${name}</th>`;
                 });
                 html += "</tr>";
 
@@ -234,21 +249,6 @@
     html += "</table>";
     document.getElementById("historyTable").innerHTML = html;
 }
-
-        function showLeaderboard() {
-            let list = scores.map((s, i) => ({ name: players[i], ...s }));
-
-            list.sort((a, b) => {
-                if (a.tier !== b.tier) return b.tier - a.tier;
-                if (a.subvalue !== b.subvalue) return b.subvalue - a.subvalue;
-                if (a.throws !== b.throws) return a.throws - b.throws;
-                return a.playerIndex - b.playerIndex;
-            });
-            wins[list[0].playerIndex]++;
-            
-            localStorage.setItem("schockenWinner", list[0].name);
-            document.getElementById("leaderboard").innerHTML = html;
-        }
 
 
         function resetGame() {
