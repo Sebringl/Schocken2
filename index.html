@@ -166,7 +166,7 @@
     } else if (a === b && b === c) {
         label = `Pasch`;
         tier = 2; subvalue = a;
-    } else if ((a - b === 1 && b - c === 1) {
+    } else if (a - b === 1 && b - c === 1) {
         label = "Straße";
         tier = 1; subvalue = a;
     } else {
@@ -190,33 +190,33 @@
 
                 let html = "<h3>Punkteverlauf</h3><table border='1' style='margin:auto; border-collapse:collapse;'>";
 
-                // Erste Kopfzeile: Runde + Spielerüberschriften (über zwei Spalten)
+                // Kopfzeile mit Spielernamen
                 html += "<tr><th rowspan='2'>Runde</th>";
                 players.forEach(name => {
-                    html += `<th colspan="2" style="text-align:center;">${name}</th>`;
+                    html += `<th colspan="2">${name}</th>`;
                 });
                 html += "</tr>";
 
-                // Zweite Kopfzeile: Spaltennamen pro Spieler
+                // Unter-Kopfzeile mit "Wurf" und "Würfe"
                 html += "<tr>";
                 players.forEach(() => {
                     html += "<th>Wurf</th><th>Würfe</th>";
                 });
                 html += "</tr>";
 
-                // Runden-Daten
+                // Rundenzeilen
                 history.forEach((r, i) => {
                     html += `<tr><td>${i + 1}</td>`;
                     for (let j = 0; j < players.length; j++) {
-                        const entry = r[j];
-                        html += `<td>${entry ? entry.label : ""}</td><td style="text-align:center;">${entry ? entry.throws : ""}</td>`;
+                    const entry = r[j];
+                    html += `<td>${entry ? entry.label : ""}</td><td style="text-align:center;">${entry ? entry.throws : ""}</td>`;
                     }
                     html += "</tr>";
-                });
+            });
 
-                html += "</table>";
-                document.getElementById("historyTable").innerHTML = html;
-            }
+    html += "</table>";
+    document.getElementById("historyTable").innerHTML = html;
+}
 
         function showLeaderboard() {
             let list = scores.map((s, i) => ({ name: players[i], ...s }));
