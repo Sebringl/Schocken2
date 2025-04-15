@@ -175,14 +175,25 @@
 }
 
         function prepareNextRound() {
-            throwCount = 0; currentPlayer = startPlayerIndex;;
-            scores = new Array(players.length).fill(null); dice = [null, null, null];
-            held = [false, false, false]; convertible = [false, false, false];
-            document.getElementById("result").textContent = "";
-            document.getElementById("throwCount").textContent = "Wurf: 0";
-            maxThrowsThisRound = 3; history.push([]); roundNumber++;
-            document.getElementById("roundDisplay").textContent = "Runde: " + roundNumber;
-            showPlayer(); updateDiceDisplay();
+          throwCount = 0;
+          maxThrowsThisRound = 3;
+          currentPlayer = startPlayerIndex;
+
+          dice = [null, null, null];
+          held = [false, false, false];
+          convertible = [false, false, false];
+
+          document.getElementById("rollBtn").disabled = false;
+          document.getElementById("rollBtn").textContent = `Würfeln (noch ${maxThrowsThisRound})`;
+
+          document.getElementById("result").textContent = "";
+          document.getElementById("throwCount").textContent = "Wurf: 0";
+
+          roundNumber++;
+          document.getElementById("roundDisplay").textContent = "Runde: " + roundNumber;
+
+          showPlayer();
+          updateDiceDisplay();
         }
 
         function showPlayer() {
@@ -206,11 +217,12 @@
         const rollBtn = document.getElementById("rollBtn");
 
         if (remaining > 0) {
-            rollBtn.textContent = `Würfeln (${remaining})`;
+          rollBtn.textContent = `Würfeln (${remaining})`;
+          rollBtn.disabled = false;
         } else {
-            rollBtn.textContent = "Würfeln";
-        }            
-            }
+          rollBtn.textContent = "Würfeln";
+          rollBtn.disabled = true;
+        }
 
         function rateRoll(dice, throws, playerIndex) {
             const [a, b, c] = dice.slice().sort((x, y) => y - x);
