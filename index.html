@@ -225,7 +225,9 @@
                 // Kopfzeile mit Spielernamen
                 html += "<tr><th rowspan='2'>Runde</th>";
                 players.forEach(name => {
-                    html += `<th colspan="2">${name}</th>`;
+                    const winCount = wins[i];
+                    const displayName = winCount > 0 ? `${name} (${winCount} 👑)` : name;
+                    html += `<th colspan="2">${displayName}</th>`;
                 });
                 html += "</tr>";
 
