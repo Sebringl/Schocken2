@@ -45,6 +45,7 @@
         let players = [], scores = [], currentPlayer = 0, maxThrowsThisRound = 3;
         let throwCount = 0, dice = [null, null, null], held = [false, false, false], convertible = [false, false, false];
         let diceSymbols = ['⚀', '⚁', '⚂', '⚃', '⚄', '⚅'], roundNumber = 0, history = [];
+        let wins = [];
 
         document.getElementById("playerCountInput").addEventListener("change", function() {
             const count = parseInt(this.value), container = document.getElementById("nameInputs");
@@ -62,6 +63,7 @@
             }
             localStorage.setItem("schockenPlayers", JSON.stringify(savedNames));
             scores = new Array(players.length).fill(null);
+            wins = new Array(players.length).fill(0);
             document.getElementById("roundDisplay").textContent = "Runde: " + roundNumber;
             document.getElementById("setup").style.display = "none";
             document.getElementById("game").style.display = "block";
@@ -173,13 +175,13 @@
         label = `Schock ${c}`;
         tier = 3; subvalue = c;
     } else if (a === b && b === c) {
-        label = `Pasch ${a}${b}${c}`;
+        label = "Pasch";
         tier = 2; subvalue = a;
     } else if (a - b === 1 && b - c === 1) {
         label = "Straße";
         tier = 1; subvalue = a;
     } else {
-        label = `Wurf: ${a}${b}${c}`;
+        label = `${a}${b}${c}`;
         tier = 0; subvalue = a + b + c;
     }
 
@@ -238,11 +240,16 @@
                 if (a.throws !== b.throws) return a.throws - b.throws;
                 return a.playerIndex - b.playerIndex;
             });
-
+            wins[list[0].playerIndex]++;
+            
             localStorage.setItem("schockenWinner", list[0].name);
             let html = "<h3>Ergebnisse</h3><ol>";
             list.forEach(e => {
-                html += `<li>${e.name}: ${e.label} <small>(${e.throws})</small></li>`;
+                let nameWithWins = e.name;
+                if (wins[e.playerIndex] > 0) {
+                nameWithWins += ` (${wins[e.playerIndex]})`;
+                }
+                html += `<li>${nameWithWins}: ${e.label} <small>(${e.throws})</small></li>`;
             });
             html += "</ol>";
             document.getElementById("leaderboard").innerHTML = html;
