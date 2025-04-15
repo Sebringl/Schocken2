@@ -113,7 +113,7 @@
             if (throwCount >= maxThrowsThisRound) { document.getElementById("rollBtn").disabled = true; return; }
             let rolled = [];
             for (let i = 0; i < 3; i++) if (!held[i]) { dice[i] = rollDie(); rolled.push(i); }
-            applyManualSixRule(rolled); throwCount++; updateDiceDisplay(); 
+            throwCount++; applyManualSixRule(rolled);  updateDiceDisplay(); 
             document.getElementById("throwCount").textContent = `Wurf: ${throwCount}`;
             document.getElementById("endTurnBtn").disabled = false;
             
@@ -209,8 +209,9 @@
             rollBtn.textContent = `Würfeln (${remaining})`;
         } else {
             rollBtn.textContent = "Würfeln";
-        }            
+          }            
             }
+        }
 
         function rateRoll(dice, throws, playerIndex) {
             const [a, b, c] = dice.slice().sort((x, y) => y - x);
