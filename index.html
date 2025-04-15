@@ -233,30 +233,33 @@
     document.getElementById("historyTable").innerHTML = html;
 }
 
-        function showLeaderboard() {
-            let list = scores.map((s, i) => ({ name: players[i], playerIndex: i, ...s }));
+function showLeaderboard() {
+    let list = scores.map((s, i) => ({ name: players[i], playerIndex: i, ...s }));
 
-            list.sort((a, b) => {
-                if (a.tier !== b.tier) return b.tier - a.tier;
-                if (a.subvalue !== b.subvalue) return b.subvalue - a.subvalue;
-                if (a.throws !== b.throws) return a.throws - b.throws;
-                return a.playerIndex - b.playerIndex;
-            });
-            wins[list[0].playerIndex]++;
-            
-            localStorage.setItem("schockenWinner", list[0].name);
-            let html = "<h3>Ergebnisse</h3><ol>";
-            list.forEach(e => {
-                let nameWithWins = e.name;
-                if (wins[e.playerIndex] > 0) {
-                nameWithWins += ` (${wins[e.playerIndex]})`;
-                }
-                html += `<li>${nameWithWins}: ${e.label} <small>(${e.throws})</small></li>`;
-            });
-            html += "</ol>";
-            document.getElementById("leaderboard").innerHTML = html;
+    list.sort((a, b) => {
+        if (a.tier !== b.tier) return b.tier - a.tier;
+        if (a.subvalue !== b.subvalue) return b.subvalue - a.subvalue;
+        if (a.throws !== b.throws) return a.throws - b.throws;
+        return a.playerIndex - b.playerIndex;
+    });
+
+    // Sieger dieser Runde erhält eine Krone mehr
+    wins[list[0].playerIndex]++;
+
+    localStorage.setItem("schockenWinner", list[0].name);
+
+    let html = "<h3>Ergebnisse</h3><ol>";
+    list.forEach(e => {
+        let nameWithWins = e.name;
+        if (wins[e.playerIndex] > 0) {
+            nameWithWins += ` (${wins[e.playerIndex]} 👑)`;
         }
+        html += `<li>${nameWithWins}: ${e.label} <small>(${e.throws})</small></li>`;
+    });
+    html += "</ol>";
 
+    document.getElementById("leaderboard").innerHTML = html;
+}
 
         function resetGame() {
             const winner = document.querySelector("#leaderboard ol li");
