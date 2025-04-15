@@ -207,8 +207,10 @@
 
                 // Kopfzeile mit Spielernamen
                 html += "<tr><th rowspan='2'>Runde</th>";
-                players.forEach(name => {
-                    html += `<th colspan="2">${name}</th>`;
+                players.forEach((name, i) => {
+                const winCount = wins[i];
+                const displayName = winCount > 0 ? `${name} (${winCount} 👑)` : name;
+                html += `<th colspan="2">${displayName}</th>`;
                 });
                 html += "</tr>";
 
@@ -245,15 +247,6 @@
             wins[list[0].playerIndex]++;
             
             localStorage.setItem("schockenWinner", list[0].name);
-            let html = "<h3>Ergebnisse</h3><ol>";
-            list.forEach(e => {
-                let nameWithWins = e.name;
-                if (wins[e.playerIndex] > 0) {
-                nameWithWins += ` (${wins[e.playerIndex]})`;
-                }
-                html += `<li>${nameWithWins}: ${e.label} <small>(${e.throws})</small></li>`;
-            });
-            html += "</ol>";
             document.getElementById("leaderboard").innerHTML = html;
         }
 
