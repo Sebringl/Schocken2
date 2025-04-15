@@ -149,34 +149,37 @@
             }
 
 
-        function rateRoll(dice) {
-            const [a, b, c] = dice.slice().sort((x, y) => y - x);
-            let label, tier, subvalue;
-            if (a === 1 && b === 1 && c === 1) {
-                label = "Schock Out";
-                tier = 4; subvalue = 6;
-            } else if (a === 1 && b === 1) {
-                label = `Schock ${c}!`;
-                tier = 3; subvalue = c;
-            } else if (a === b && b === c) {
-                label = `Pasch ${a}${b}${c}`;
-                tier = 2; subvalue = a;
-            } else if ((a - b === 1 && b - c === 1) {
-                label = `Straße ${a}${b}${c}`;
-                tier = 1; subvalue = a;
-            } else {
-                label = `Wurf: ${a}${b}${c}`;
-                tier = 0; subvalue = a + b + c;
-            }
-            return {
-                label,
-                value: tier * 1000 + subvalue, // interne Zahl für Sortierung (optional)
-                tier,
-                subvalue,
-                throws,
-                playerIndex
-            };
-        }
+   
+    function rateRoll(dice, throws, playerIndex) {
+    const [a, b, c] = dice.slice().sort((x, y) => y - x);
+    let label, tier, subvalue;
+
+    if (a === 1 && b === 1 && c === 1) {
+        label = "Schock Out";
+        tier = 4; subvalue = 6;
+    } else if (a === 1 && b === 1) {
+        label = `Schock ${c}!`;
+        tier = 3; subvalue = c;
+    } else if (a === b && b === c) {
+        label = `Pasch ${a}${b}${c}`;
+        tier = 2; subvalue = a;
+    } else if ((a - b === 1 && b - c === 1) || (a === 4 && b === 2 && c === 1)) {
+        label = "Straße";
+        tier = 1; subvalue = a;
+    } else {
+        label = `Wurf: ${a}${b}${c}`;
+        tier = 0; subvalue = a + b + c;
+    }
+
+    return {
+        label,
+        value: tier * 1000 + subvalue,
+        tier,
+        subvalue,
+        throws,
+        playerIndex
+    };
+}
 
         function updateHistoryTable() {
             if (!history.length) return;
@@ -192,20 +195,23 @@
 
         function showLeaderboard() {
             let list = scores.map((s, i) => ({ name: players[i], ...s }));
+
             list.sort((a, b) => {
-            if (a.tier !== b.tier) return b.tier - a.tier; // bessere Stufe gewinnt
-            if (a.subvalue !== b.subvalue) return b.subvalue - a.subvalue; // höhere Feinwertung
-            if (a.throws !== b.throws) return a.throws - b.throws; // weniger Würfe gewinnt
-            return a.playerIndex - b.playerIndex; // früher dran gewinnt
+                if (a.tier !== b.tier) return b.tier - a.tier;
+                if (a.subvalue !== b.subvalue) return b.subvalue - a.subvalue;
+                if (a.throws !== b.throws) return a.throws - b.throws;
+                return a.playerIndex - b.playerIndex;
             });
+
             localStorage.setItem("schockenWinner", list[0].name);
             let html = "<h3>Ergebnisse</h3><ol>";
-                list.forEach(e => {
-                html += `<li>${e.name}: ${e.label} <small>(${e.throws})</small></li>`;
+            list.forEach(e => {
+                html += `<li>${e.name}: ${e.label} <small>(Würfe: ${e.throws})</small></li>`;
             });
             html += "</ol>";
             document.getElementById("leaderboard").innerHTML = html;
         }
+
 
         function resetGame() {
             const winner = document.querySelector("#leaderboard ol li");
