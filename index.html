@@ -142,7 +142,7 @@
         function updateDiceDisplay() {
             for (let i = 0; i < 3; i++) {
                 const el = document.getElementById("die" + i);
-                el.textContent = (dice[i] === null) ? "◻️" : diceSymbols[dice[i] - 1];
+                el.textContent = (dice[i] === null) ? "□" : diceSymbols[dice[i] - 1];
                 el.className = "die";
             if (held[i]) el.classList.add("held");
                 }
