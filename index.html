@@ -215,7 +215,7 @@ function nextPlayer() {
 }
 
         function prepareNextRound() {
-            throwCount = 0; currentPlayer = startPlayerIndex;;
+            throwCount = 0; currentPlayer = startPlayerIndex;
             scores = new Array(players.length).fill(null); dice = [null, null, null];
             held = [false, false, false]; convertible = [false, false, false];
             document.getElementById("result").textContent = "";
