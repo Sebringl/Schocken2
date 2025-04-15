@@ -115,8 +115,10 @@
 
         function nextPlayer() {
             currentPlayer++;
-            if (currentPlayer >= players.length) { showLeaderboard(); prepareNextRound(); }
-            else {
+            if (currentPlayer >= players.length) {
+                prepareNextRound();       // zuerst vorbereiten
+                showLeaderboard();        // dann Ergebnisse anzeigen (mit 👑)
+            } else {
                 throwCount = 0;
                 dice = [null, null, null]; 
                 held = [false, false, false];
@@ -125,6 +127,7 @@
                 showPlayer();
             }
         }
+
 
         function prepareNextRound() {
             throwCount = 0; currentPlayer = 0;
