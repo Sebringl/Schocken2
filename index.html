@@ -43,7 +43,7 @@
     </div>
     <script>
         let players = [], scores = [], currentPlayer = 0, maxThrowsThisRound = 3;
-        let throwCount = 0, dice = [1, 1, 1], held = [false, false, false], convertible = [false, false, false];
+        let throwCount = 0, dice = [null, null, null], held = [false, false, false], convertible = [false, false, false];
         let diceSymbols = ['⚀', '⚁', '⚂', '⚃', '⚄', '⚅'], roundNumber = 0, history = [];
 
         document.getElementById("playerCountInput").addEventListener("change", function() {
@@ -135,7 +135,7 @@
         function updateDiceDisplay() {
             for (let i = 0; i < 3; i++) {
                 const el = document.getElementById("die" + i);
-                el.textContent = diceSymbols[dice[i] - 1]; el.className = "die";
+                el.textContent = (dice[i] === null) ? "" : diceSymbols[dice[i] - 1]; el.className = "die";
                 if (held[i]) el.classList.add("held");
             }
         }
