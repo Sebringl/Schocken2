@@ -100,7 +100,7 @@
 
         function endTurn() {
             if (currentPlayer === 0 && throwCount > 0) maxThrowsThisRound = Math.min(3, throwCount);
-            const score = rateRoll(dice);
+            const score = rateRoll(dice, throwCount, currentPlayer);
             scores[currentPlayer] = score;
             history[roundNumber - 1][currentPlayer] = score.label;
             updateHistoryTable(); nextPlayer();
@@ -151,11 +151,31 @@
 
         function rateRoll(dice) {
             const [a, b, c] = dice.slice().sort((x, y) => y - x);
-            if (a === 1 && b === 1 && c === 1) return { label: "Schock Out", value: 999 };
-            if (a === 1 && b === 1) return { label: `Schock ${c}!`, value: 900 + c };
-            if (a === b && b === c) return { label: `Pasch`, value: 800};
-            if ((a - b === 1 && b - c === 1) return { label: "Straße", value: 700};
-            return { label: `Wurf: ${a}${b}${c}`, value: a + b + c };
+            let label, tier, subvalue;
+            if (a === 1 && b === 1 && c === 1) {
+                label = "Schock Out";
+                tier = 4; subvalue = 6;
+            } else if (a === 1 && b === 1) {
+                label = `Schock ${c}!`;
+                tier = 3; subvalue = c;
+            } else if (a === b && b === c) {
+                label = `Pasch ${a}${b}${c}`;
+                tier = 2; subvalue = a;
+            } else if ((a - b === 1 && b - c === 1) {
+                label = `Straße ${a}${b}${c}`;
+                tier = 1; subvalue = a;
+            } else {
+                label = `Wurf: ${a}${b}${c}`;
+                tier = 0; subvalue = a + b + c;
+            }
+            return {
+                label,
+                value: tier * 1000 + subvalue, // interne Zahl für Sortierung (optional)
+                tier,
+                subvalue,
+                throws,
+                playerIndex
+            };
         }
 
         function updateHistoryTable() {
@@ -172,10 +192,18 @@
 
         function showLeaderboard() {
             let list = scores.map((s, i) => ({ name: players[i], ...s }));
-            list.sort((a, b) => b.value - a.value);
+            list.sort((a, b) => {
+            if (a.tier !== b.tier) return b.tier - a.tier; // bessere Stufe gewinnt
+            if (a.subvalue !== b.subvalue) return b.subvalue - a.subvalue; // höhere Feinwertung
+            if (a.throws !== b.throws) return a.throws - b.throws; // weniger Würfe gewinnt
+            return a.playerIndex - b.playerIndex; // früher dran gewinnt
+            });
             localStorage.setItem("schockenWinner", list[0].name);
             let html = "<h3>Ergebnisse</h3><ol>";
-            list.forEach(e => html += `<li>${e.name}: ${e.label}</li>`); html += "</ol>";
+                list.forEach(e => {
+                html += `<li>${e.name}: ${e.label} <small>(${e.throws})</small></li>`;
+            });
+            html += "</ol>";
             document.getElementById("leaderboard").innerHTML = html;
         }
 
