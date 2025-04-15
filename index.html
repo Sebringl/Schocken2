@@ -14,6 +14,35 @@
     input { font-size: 18px; padding: 5px 10px; margin: 5px; }
     #result, #throwCount, #playerDisplay { font-size: 20px; margin-top: 10px; }
     #leaderboard { text-align: left; margin-top: 20px; }
+    #historyTable table {
+      border-collapse: collapse;
+      margin: auto;
+      width: 100%;
+      font-size: 0.9rem;
+    }
+
+  #historyTable th, #historyTable td {
+      border: 1px solid #ccc;
+      padding: 4px 8px;
+      text-align: center;
+  }
+
+  #historyTable th {
+    background-color: #f0f0f0;
+    font-weight: bold;
+  }
+  #historyTable th {
+    background-color: #e0e0e0;
+  }
+    
+  #historyTable tr:nth-child(even) {
+    background-color: #f9f9f9;
+  }
+
+  #historyTable td {
+    min-width: 60px;
+  }
+    
   </style>
 </head>
 <body>
@@ -259,6 +288,8 @@
    
 
 function updateHistoryTable() {
+
+  
     if (!history.length) return;
 
     let html = "<h3>Punkteverlauf</h3><table border='1' style='margin:auto; border-collapse:collapse;'>";
@@ -275,7 +306,7 @@ function updateHistoryTable() {
     // Unter-Kopfzeile
     html += "<tr>";
     players.forEach(() => {
-        html += "<th>Wurf</th><th>Würfe</th>";
+      html += "<th>🎲</th><th>🔁</th>";
     });
     html += "</tr>";
 
