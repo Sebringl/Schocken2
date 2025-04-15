@@ -39,6 +39,20 @@
   #historyTable td {
     min-width: 60px;
   }
+
+  /*Highlight-Stile für die Tabelle */
+  .highlight-current {
+    background-color: #eeeeee !important;
+  }
+
+  .highlight-roundbest {
+    background-color: #fff4b8 !important;
+  }
+
+  .highlight-finalwinner {
+    background-color: #ffe680 !important;
+  }
+    
     
   </style>
 </head>
@@ -283,7 +297,29 @@ function updateDiceDisplay() {
         playerIndex
     };
 }
-   
+
+function getRoundBestPlayerIndex(round) {
+  const entries = round
+    .map((entry, i) => ({ ...entry, index: i }))
+    .filter(e => e.label && typeof e.tier !== 'undefined');
+
+  if (!entries.length) return null;
+
+  entries.sort((a, b) => {
+    if (a.tier !== b.tier) return b.tier - a.tier;
+    if (a.subvalue !== b.subvalue) return b.subvalue - a.subvalue;
+    if (a.throws !== b.throws) return a.throws - b.throws;
+    return a.index - b.index;
+  });
+
+  return entries[0].index;
+}
+
+function getRoundWinner(round) {
+  return getRoundBestPlayerIndex(round); // für fertige Runden verwenden wir dieselbe Logik
+}
+
+    
 
 function updateHistoryTable() {
 
@@ -311,11 +347,24 @@ function updateHistoryTable() {
     // Rundenverlauf
     history.forEach((r, i) => {
         html += `<tr><td>${i + 1}</td>`;
-        for (let j = 0; j < players.length; j++) {
-            const entry = r[j];
-            html += `<td>${entry ? entry.label : ""}</td><td style="text-align:center;">${entry ? entry.throws : ""}</td>`;
-        }
-        html += "</tr>";  // <--- HIER war der kaputte String
+      const currentRound = (i === roundNumber - 1);
+      const currentBest = currentRound ? getRoundBestPlayerIndex(r) : null;
+      const finalBest = (!currentRound && r.length) ? getRoundWinner(r) : null;
+
+      for (let j = 0; j < players.length; j++) {
+          const entry = r[j];
+          let labelClass = "";
+          if (entry) {
+              if (currentPlayer === j && currentRound) labelClass = "highlight-current";
+              if (j === currentBest && currentRound) labelClass = "highlight-roundbest";
+              if (j === finalBest && !currentRound) labelClass = "highlight-finalwinner";
+          }
+
+          html += `<td class="${labelClass}">${entry ? entry.label : ""}</td>`;
+          html += `<td class="${labelClass}" style="text-align:center;">${entry ? entry.throws : ""}</td>`;
+      }
+
+        html += "</tr>";  
     });
 
     html += "</table>";
