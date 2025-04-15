@@ -214,38 +214,36 @@
 }
    
 
+function updateHistoryTable() {
+    if (!history.length) return;
 
+    let html = "<h3>Punkteverlauf</h3><table border='1' style='margin:auto; border-collapse:collapse;'>";
 
-            function updateHistoryTable() {
-                if (!history.length) return;
+    // Kopfzeile mit Spielernamen + Siegen
+    html += "<tr><th rowspan='2'>Runde</th>";
+    players.forEach((name, i) => {
+        const winCount = wins[i];
+        const displayName = winCount > 0 ? `${name} (${winCount} 👑)` : name;
+        html += `<th colspan="2">${displayName}</th>`;
+    });
+    html += "</tr>";
 
-                let html = "<h3>Punkteverlauf</h3><table border='1' style='margin:auto; border-collapse:collapse;'>";
+    // Unter-Kopfzeile mit "Wurf" und "Würfe"
+    html += "<tr>";
+    players.forEach(() => {
+        html += "<th>Wurf</th><th>Würfe</th>";
+    });
+    html += "</tr>";
 
-                // Kopfzeile mit Spielernamen
-                html += "<tr><th rowspan='2'>Runde</th>";
-                players.forEach((name, i) => {
-                    const winCount = wins[i];
-                    const displayName = winCount > 0 ? `${name} (${winCount} 👑)` : name;
-                    html += `<th colspan="2">${displayName}</th>`;
-                });
-                html += "</tr>";
-
-                // Unter-Kopfzeile mit "Wurf" und "Würfe"
-                html += "<tr>";
-                players.forEach(() => {
-                    html += "<th>Wurf</th><th>Würfe</th>";
-                });
-                html += "</tr>";
-
-                // Rundenzeilen
-                history.forEach((r, i) => {
-                    html += `<tr><td>${i + 1}</td>`;
-                    for (let j = 0; j < players.length; j++) {
-                    const entry = r[j];
-                    html += `<td>${entry ? entry.label : ""}</td><td style="text-align:center;">${entry ? entry.throws : ""}</td>`;
-                    }
-                    html += "</tr>";
-            });
+    // Rundenzeilen
+    history.forEach((r, i) => {
+        html += `<tr><td>${i + 1}</td>`;
+        for (let j = 0; j < players.length; j++) {
+            const entry = r[j];
+            html += `<td>${entry ? entry.label : ""}</td><td style="text-align:center;">${entry ? entry.throws : ""}</td>`;
+        }
+        html += "</tr>`;
+    });
 
     html += "</table>";
     document.getElementById("historyTable").innerHTML = html;
