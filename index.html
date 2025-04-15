@@ -234,7 +234,7 @@
 }
 
         function showLeaderboard() {
-            let list = scores.map((s, i) => ({ name: players[i], ...s }));
+            let list = scores.map((s, i) => ({ name: players[i], playerIndex: i, ...s }));
 
             list.sort((a, b) => {
                 if (a.tier !== b.tier) return b.tier - a.tier;
