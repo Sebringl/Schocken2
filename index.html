@@ -180,38 +180,38 @@
             updateHistoryTable(); nextPlayer();
         }
 
-        function nextPlayer() {
-    currentPlayer = (currentPlayer + 1) % players.length;
+function nextPlayer() {
+  if (currentPlayer < players.length - 1) {
+    // Nächster Spieler
+    currentPlayer++;
+    throwCount = 0;
+    dice = [null, null, null];
+    held = [false, false, false];
+    convertible = [false, false, false];
+    updateDiceDisplay();
+    showPlayer();
+  } else {
+    // Letzter Spieler war dran → Runde beenden
+    let list = scores.map((s, i) => ({ name: players[i], playerIndex: i, ...s }));
 
-    if (currentPlayer >= players.length) {
-        // Rundensieger ermitteln
-        let list = scores.map((s, i) => ({ name: players[i], playerIndex: i, ...s }));
+    list.sort((a, b) => {
+      if (a.tier !== b.tier) return b.tier - a.tier;
+      if (a.subvalue !== b.subvalue) return b.subvalue - a.subvalue;
+      if (a.throws !== b.throws) return a.throws - b.throws;
+      return a.playerIndex - b.playerIndex;
+    });
 
-        list.sort((a, b) => {
-            if (a.tier !== b.tier) return b.tier - a.tier;
-            if (a.subvalue !== b.subvalue) return b.subvalue - a.subvalue;
-            if (a.throws !== b.throws) return a.throws - b.throws;
-            return a.playerIndex - b.playerIndex;
-        });
+    // Sieger bekommt Krone
+    wins[list[0].playerIndex]++;
+    localStorage.setItem("schockenWinner", list[0].name);
 
-        wins[list[0].playerIndex]++;
-        localStorage.setItem("schockenWinner", list[0].name);
+    // Verlierer beginnt neue Runde
+    const loser = list[list.length - 1];
+    startPlayerIndex = loser.playerIndex;
 
-          // Startspieler der nächsten Runde: Verlierer (letzter in sortierter Liste)
-        const loser = list[list.length - 1];
-        startPlayerIndex = loser.playerIndex;
-
-        prepareNextRound(); // Starte nächste Runde
-        updateHistoryTable(); // Zeige aktualisierte Sieg-Kronen in Tabelle
-    } else {
-        // Nächster Spieler vorbereiten
-        throwCount = 0;
-        dice = [null, null, null];
-        held = [false, false, false];
-        convertible = [false, false, false];
-        updateDiceDisplay();
-        showPlayer();
-    }
+    prepareNextRound();
+    updateHistoryTable();
+  }
 }
 
         function prepareNextRound() {
