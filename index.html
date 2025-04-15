@@ -181,7 +181,7 @@
         }
 
         function nextPlayer() {
-    currentPlayer++;
+    currentPlayer = (currentPlayer + 1) % players.length;
 
     if (currentPlayer >= players.length) {
         // Rundensieger ermitteln
@@ -355,8 +355,17 @@ function updateHistoryTable() {
           const entry = r[j];
           let labelClass = "";
           if (entry) {
-              if (currentPlayer === j && currentRound) labelClass = "highlight-current";
-              if (j === currentBest && currentRound) labelClass = "highlight-roundbest";
+              if (entry) {
+    if (j === currentBest && currentRound) {
+        labelClass = "highlight-roundbest";
+    } else if (currentPlayer === j && currentRound) {
+        labelClass = "highlight-current";
+    }
+
+    if (j === finalBest && !currentRound) {
+        labelClass = "highlight-finalwinner";
+    }
+}
               if (j === finalBest && !currentRound) labelClass = "highlight-finalwinner";
           }
 
