@@ -145,7 +145,6 @@
             throwCount = 0; currentPlayer = 0;
             scores = new Array(players.length).fill(null); dice = [null, null, null];
             held = [false, false, false]; convertible = [false, false, false];
-            document.getElementById("leaderboard").innerHTML = "";
             document.getElementById("result").textContent = "";
             document.getElementById("throwCount").textContent = "Wurf: 0";
             maxThrowsThisRound = 3; history.push([]); roundNumber++;
@@ -224,7 +223,7 @@
 
                 // Kopfzeile mit Spielernamen
                 html += "<tr><th rowspan='2'>Runde</th>";
-                players.forEach(name => {
+                players.forEach((name, i) => {
                     const winCount = wins[i];
                     const displayName = winCount > 0 ? `${name} (${winCount} 👑)` : name;
                     html += `<th colspan="2">${displayName}</th>`;
@@ -264,7 +263,6 @@
             });
             document.getElementById("setup").style.display = "block";
             document.getElementById("game").style.display = "none";
-            document.getElementById("leaderboard").innerHTML = "";
             roundNumber = 0; history = [];
         }
     </script>
