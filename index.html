@@ -154,36 +154,38 @@
             }
 
         function rateRoll(dice, throws, playerIndex) {
-    const [a, b, c] = dice.slice().sort((x, y) => y - x);
-    let label, tier, subvalue;
+            const [a, b, c] = dice.slice().sort((x, y) => y - x);
+            let label, tier, subvalue;
 
-    if (dice.includes(null)) {
-        return {
-            label: "Ungültiger Wurf",
-            value: 0,
-            tier: -1,
-            subvalue: 0,
-            throws,
-            playerIndex
-        };
-    }
+            if (dice.includes(null)) {
+                return {
+                    label: "Ungültiger Wurf",
+                    value: 0,
+                    tier: -1,
+                    subvalue: 0,
+                    throws,
+                    playerIndex
+                };
+           }
 
-    if (a === 1 && b === 1 && c === 1) {
-        label = "Schock Out";
-        tier = 4; subvalue = 6;
-    } else if (a === 1 && b === 1) {
-        label = `Schock ${c}`;
-        tier = 3; subvalue = c;
-    } else if (a === b && b === c) {
-        label = "Pasch";
-        tier = 2; subvalue = a;
-    } else if (a - b === 1 && b - c === 1) {
-        label = "Straße";
-        tier = 1; subvalue = a;
-    } else {
-        label = `${a}${b}${c}`;
-        tier = 0; subvalue = a + b + c;
-    }
+        const countOf1 = dice.filter(d => d === 1).length;
+                
+        if (countOf1 === 3) {
+            label = "Schock Out";
+            tier = 4; subvalue = 6;
+        } else if (countOf1 === 2)  {
+            label = `Schock ${c}`;
+            tier = 3; subvalue = c;
+        } else if (a === b && b === c) {
+            label = "Pasch";
+            tier = 2; subvalue = a;
+        } else if (a - b === 1 && b - c === 1) {
+            label = "Straße";
+            tier = 1; subvalue = a;
+        } else {
+            label = `${a}${b}${c}`;
+            tier = 0; subvalue = a + b + c;
+        }
 
     return {
         label,
