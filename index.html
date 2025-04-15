@@ -63,6 +63,9 @@
             }
             localStorage.setItem("schockenPlayers", JSON.stringify(savedNames));
             scores = new Array(players.length).fill(null);
+            if (wins.length !== players.length) {
+                wins = new Array(players.length).fill(0);
+            }
             document.getElementById("roundDisplay").textContent = "Runde: " + roundNumber;
             document.getElementById("setup").style.display = "none";
             document.getElementById("game").style.display = "block";
