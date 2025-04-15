@@ -113,7 +113,7 @@
             if (throwCount >= maxThrowsThisRound) { document.getElementById("rollBtn").disabled = true; return; }
             let rolled = [];
             for (let i = 0; i < 3; i++) if (!held[i]) { dice[i] = rollDie(); rolled.push(i); }
-            applyManualSixRule(rolled); updateDiceDisplay(); throwCount++;
+            applyManualSixRule(rolled); throwCount++; updateDiceDisplay(); 
             document.getElementById("throwCount").textContent = `Wurf: ${throwCount}`;
             document.getElementById("endTurnBtn").disabled = false;
             
@@ -175,25 +175,14 @@
 }
 
         function prepareNextRound() {
-          throwCount = 0;
-          maxThrowsThisRound = 3;
-          currentPlayer = startPlayerIndex;
-
-          dice = [null, null, null];
-          held = [false, false, false];
-          convertible = [false, false, false];
-
-          document.getElementById("rollBtn").disabled = false;
-          document.getElementById("rollBtn").textContent = `Würfeln (noch ${maxThrowsThisRound})`;
-
-          document.getElementById("result").textContent = "";
-          document.getElementById("throwCount").textContent = "Wurf: 0";
-
-          roundNumber++;
-          document.getElementById("roundDisplay").textContent = "Runde: " + roundNumber;
-
-          showPlayer();
-          updateDiceDisplay();
+            throwCount = 0; currentPlayer = startPlayerIndex;;
+            scores = new Array(players.length).fill(null); dice = [null, null, null];
+            held = [false, false, false]; convertible = [false, false, false];
+            document.getElementById("result").textContent = "";
+            document.getElementById("throwCount").textContent = "Wurf: 0";
+            maxThrowsThisRound = 3; history.push([]); roundNumber++;
+            document.getElementById("roundDisplay").textContent = "Runde: " + roundNumber;
+            showPlayer(); updateDiceDisplay();
         }
 
         function showPlayer() {
@@ -217,12 +206,11 @@
         const rollBtn = document.getElementById("rollBtn");
 
         if (remaining > 0) {
-          rollBtn.textContent = `Würfeln (${remaining})`;
-          rollBtn.disabled = false;
+            rollBtn.textContent = `Würfeln (${remaining})`;
         } else {
-          rollBtn.textContent = "Würfeln";
-          rollBtn.disabled = true;
-        }
+            rollBtn.textContent = "Würfeln";
+        }            
+            }
 
         function rateRoll(dice, throws, playerIndex) {
             const [a, b, c] = dice.slice().sort((x, y) => y - x);
