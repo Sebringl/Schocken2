@@ -63,9 +63,7 @@
             }
             localStorage.setItem("schockenPlayers", JSON.stringify(savedNames));
             scores = new Array(players.length).fill(null);
-            if (wins.length !== players.length) {
-                wins = new Array(players.length).fill(0);
-            }
+            wins = new Array(players.length).fill(0);
             document.getElementById("roundDisplay").textContent = "Runde: " + roundNumber;
             document.getElementById("setup").style.display = "none";
             document.getElementById("game").style.display = "block";
@@ -105,7 +103,7 @@
         function endTurn() {
             if (currentPlayer === 0 && throwCount > 0) maxThrowsThisRound = Math.min(3, throwCount);
             const score = rateRoll(dice, throwCount, currentPlayer);
-            scores[currentPlayer] = { ...score, playerIndex: currentPlayer };
+            scores[currentPlayer] = score;
             history[roundNumber - 1][currentPlayer] = {
                 label: score.label,
                 throws: score.throws
@@ -115,10 +113,8 @@
 
         function nextPlayer() {
             currentPlayer++;
-            if (currentPlayer >= players.length) {
-                prepareNextRound();       // zuerst vorbereiten
-                showLeaderboard();        // dann Ergebnisse anzeigen (mit 👑)
-            } else {
+            if (currentPlayer >= players.length) { showLeaderboard(); prepareNextRound(); }
+            else {
                 throwCount = 0;
                 dice = [null, null, null]; 
                 held = [false, false, false];
@@ -128,13 +124,12 @@
             }
         }
 
-
         function prepareNextRound() {
             throwCount = 0; currentPlayer = 0;
-            dice = [null, null, null];
+            scores = new Array(players.length).fill(null); dice = [null, null, null];
             held = [false, false, false]; convertible = [false, false, false];
+            document.getElementById("leaderboard").innerHTML = "";
             document.getElementById("result").textContent = "";
-            scores = scores.map((s, i) => ({ ...s, tier: -1, value: 0, label: "", throws: 0 }));
             document.getElementById("throwCount").textContent = "Wurf: 0";
             maxThrowsThisRound = 3; history.push([]); roundNumber++;
             document.getElementById("roundDisplay").textContent = "Runde: " + roundNumber;
@@ -238,33 +233,30 @@
     document.getElementById("historyTable").innerHTML = html;
 }
 
-function showLeaderboard() {
-    let list = scores.map((s, i) => ({ name: players[i], playerIndex: i, ...s }));
+        function showLeaderboard() {
+            let list = scores.map((s, i) => ({ name: players[i], ...s }));
 
-    list.sort((a, b) => {
-        if (a.tier !== b.tier) return b.tier - a.tier;
-        if (a.subvalue !== b.subvalue) return b.subvalue - a.subvalue;
-        if (a.throws !== b.throws) return a.throws - b.throws;
-        return a.playerIndex - b.playerIndex;
-    });
-
-    // Sieger erhält Sieg-Krone
-    wins[list[0].playerIndex]++;
-
-    localStorage.setItem("schockenWinner", list[0].name);
-
-    let html = "<h3>Ergebnisse</h3><ol>";
-    list.forEach(e => {
-        let nameWithWins = e.name;
-        if (wins[e.playerIndex] > 0) {
-            nameWithWins += ` (${wins[e.playerIndex]} 👑)`;
+            list.sort((a, b) => {
+                if (a.tier !== b.tier) return b.tier - a.tier;
+                if (a.subvalue !== b.subvalue) return b.subvalue - a.subvalue;
+                if (a.throws !== b.throws) return a.throws - b.throws;
+                return a.playerIndex - b.playerIndex;
+            });
+            wins[list[0].playerIndex]++;
+            
+            localStorage.setItem("schockenWinner", list[0].name);
+            let html = "<h3>Ergebnisse</h3><ol>";
+            list.forEach(e => {
+                let nameWithWins = e.name;
+                if (wins[e.playerIndex] > 0) {
+                nameWithWins += ` (${wins[e.playerIndex]})`;
+                }
+                html += `<li>${nameWithWins}: ${e.label} <small>(${e.throws})</small></li>`;
+            });
+            html += "</ol>";
+            document.getElementById("leaderboard").innerHTML = html;
         }
-        html += `<li>${nameWithWins}: ${e.label} <small>(${e.throws})</small></li>`;
-    });
-    html += "</ol>";
 
-    document.getElementById("leaderboard").innerHTML = html;
-}
 
         function resetGame() {
             const winner = document.querySelector("#leaderboard ol li");
