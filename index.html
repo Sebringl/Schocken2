@@ -132,6 +132,7 @@
             held = [false, false, false]; convertible = [false, false, false];
             document.getElementById("leaderboard").innerHTML = "";
             document.getElementById("result").textContent = "";
+            scores = scores.map((s, i) => ({ ...s, tier: -1, value: 0, label: "", throws: 0 }));
             document.getElementById("throwCount").textContent = "Wurf: 0";
             maxThrowsThisRound = 3; history.push([]); roundNumber++;
             document.getElementById("roundDisplay").textContent = "Runde: " + roundNumber;
