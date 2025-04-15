@@ -102,7 +102,10 @@
             if (currentPlayer === 0 && throwCount > 0) maxThrowsThisRound = Math.min(3, throwCount);
             const score = rateRoll(dice, throwCount, currentPlayer);
             scores[currentPlayer] = score;
-            history[roundNumber - 1][currentPlayer] = score.label;
+            history[roundNumber - 1][currentPlayer] = {
+                label: score.label,
+                throws: score.throws
+            };
             updateHistoryTable(); nextPlayer();
         }
 
@@ -158,10 +161,10 @@
         label = "Schock Out";
         tier = 4; subvalue = 6;
     } else if (a === 1 && b === 1) {
-        label = `Schock ${c}!`;
+        label = `Schock ${c}`;
         tier = 3; subvalue = c;
     } else if (a === b && b === c) {
-        label = `Pasch ${a}${b}${c}`;
+        label = `Pasch`;
         tier = 2; subvalue = a;
     } else if ((a - b === 1 && b - c === 1) {
         label = "Straße";
@@ -181,17 +184,39 @@
     };
 }
 
-        function updateHistoryTable() {
-            if (!history.length) return;
-            let html = "<h3>Punkteverlauf</h3><table border='1' style='margin:auto;'><tr><th>Runde</th>";
-            players.forEach(n => html += `<th>${n}</th>`); html += "</tr>";
-            history.forEach((r, i) => {
-                html += `<tr><td>${i + 1}</td>`;
-                for (let j = 0; j < players.length; j++) html += `<td>${r[j] || ""}</td>`;
+
+            function updateHistoryTable() {
+                if (!history.length) return;
+
+                let html = "<h3>Punkteverlauf</h3><table border='1' style='margin:auto; border-collapse:collapse;'>";
+
+                // Erste Kopfzeile: Runde + Spielerüberschriften (über zwei Spalten)
+                html += "<tr><th rowspan='2'>Runde</th>";
+                players.forEach(name => {
+                    html += `<th colspan="2" style="text-align:center;">${name}</th>`;
+                });
                 html += "</tr>";
-            });
-            html += "</table>"; document.getElementById("historyTable").innerHTML = html;
-        }
+
+                // Zweite Kopfzeile: Spaltennamen pro Spieler
+                html += "<tr>";
+                players.forEach(() => {
+                    html += "<th>Wurf</th><th>Würfe</th>";
+                });
+                html += "</tr>";
+
+                // Runden-Daten
+                history.forEach((r, i) => {
+                    html += `<tr><td>${i + 1}</td>`;
+                    for (let j = 0; j < players.length; j++) {
+                        const entry = r[j];
+                        html += `<td>${entry ? entry.label : ""}</td><td style="text-align:center;">${entry ? entry.throws : ""}</td>`;
+                    }
+                    html += "</tr>";
+                });
+
+                html += "</table>";
+                document.getElementById("historyTable").innerHTML = html;
+            }
 
         function showLeaderboard() {
             let list = scores.map((s, i) => ({ name: players[i], ...s }));
