@@ -228,21 +228,21 @@ function updateHistoryTable() {
     });
     html += "</tr>";
 
-    // Unter-Kopfzeile mit "Wurf" und "Würfe"
+    // Unter-Kopfzeile
     html += "<tr>";
     players.forEach(() => {
         html += "<th>Wurf</th><th>Würfe</th>";
     });
     html += "</tr>";
 
-    // Rundenzeilen
+    // Rundenverlauf
     history.forEach((r, i) => {
         html += `<tr><td>${i + 1}</td>`;
         for (let j = 0; j < players.length; j++) {
             const entry = r[j];
             html += `<td>${entry ? entry.label : ""}</td><td style="text-align:center;">${entry ? entry.throws : ""}</td>`;
         }
-        html += "</tr>";
+        html += "</tr>";  // <--- HIER war der kaputte String
     });
 
     html += "</table>";
