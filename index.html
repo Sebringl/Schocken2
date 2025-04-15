@@ -105,7 +105,7 @@
         function endTurn() {
             if (currentPlayer === 0 && throwCount > 0) maxThrowsThisRound = Math.min(3, throwCount);
             const score = rateRoll(dice, throwCount, currentPlayer);
-            scores[currentPlayer] = score;
+            scores[currentPlayer] = { ...score, playerIndex: currentPlayer };
             history[roundNumber - 1][currentPlayer] = {
                 label: score.label,
                 throws: score.throws
