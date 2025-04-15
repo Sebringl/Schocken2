@@ -297,9 +297,16 @@ function updateHistoryTable() {
                 const crowned = (n === winnerName) ? "👑 " : "";
                 document.getElementById("nameInputs").innerHTML += `<div>Spieler ${i + 1}: <input type="text" id="playerName${i}" value="${crowned}${n}"></div>`;
             });
-            document.getElementById("setup").style.display = "block";
-            document.getElementById("game").style.display = "none";
-            roundNumber = 0; history = [];
+          document.getElementById("setup").style.display = "block";
+          document.getElementById("game").style.display = "none";
+           document.getElementById("nameInputs").innerHTML = "";
+
+          const savedNames = JSON.parse(localStorage.getItem("schockenPlayers") || "[]");
+
+        savedNames.forEach(name => addPlayer(name));
+
+        roundNumber = 0;
+        history = [];
         }
     </script>
 </body>
