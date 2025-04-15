@@ -111,7 +111,7 @@
             if (currentPlayer >= players.length) { showLeaderboard(); prepareNextRound(); }
             else {
                 throwCount = 0;
-                dice = [null, null, null]; // <- statt [1, 1, 1]
+                dice = [null, null, null]; 
                 held = [false, false, false];
                 convertible = [false, false, false];
                 updateDiceDisplay();
@@ -142,7 +142,7 @@
         function updateDiceDisplay() {
             for (let i = 0; i < 3; i++) {
                 const el = document.getElementById("die" + i);
-                el.textContent = (dice[i] === null) ? "?" : diceSymbols[dice[i] - 1];
+                el.textContent = (dice[i] === null) ? "◻️" : diceSymbols[dice[i] - 1];
                 el.className = "die";
             if (held[i]) el.classList.add("held");
                 }
@@ -151,7 +151,7 @@
 
         function rateRoll(dice) {
             const [a, b, c] = dice.slice().sort((x, y) => y - x);
-            if (a === 1 && b === 1 && c === 1) return { label: "111", value: 999 };
+            if (a === 1 && b === 1 && c === 1) return { label: "Schock Out", value: 999 };
             if (a === 1 && b === 1) return { label: `Schock ${c}!`, value: 900 + c };
             if (a === b && b === c) return { label: `Pasch ${a}${b}${c}`, value: 800 + a };
             if ((a - b === 1 && b - c === 1) || (a === 4 && b === 2 && c === 1)) return { label: "Straße", value: 700 };
