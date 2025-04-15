@@ -288,26 +288,20 @@ function updateHistoryTable() {
 }
 
 
-        function resetGame() {
-            const winner = document.querySelector("#leaderboard ol li");
-            const winnerName = winner ? winner.textContent.split(':')[0] : null;
-            const savedNames = JSON.parse(localStorage.getItem("schockenPlayers") || "[]");
-            document.getElementById("nameInputs").innerHTML = "";
-            savedNames.forEach((n, i) => {
-                const crowned = (n === winnerName) ? "👑 " : "";
-                document.getElementById("nameInputs").innerHTML += `<div>Spieler ${i + 1}: <input type="text" id="playerName${i}" value="${crowned}${n}"></div>`;
-            });
-          document.getElementById("setup").style.display = "block";
-          document.getElementById("game").style.display = "none";
-           document.getElementById("nameInputs").innerHTML = "";
+function resetGame() {
+    const winner = document.querySelector("#leaderboard ol li");
+    const winnerName = winner ? winner.textContent.split(':')[0] : null;
+    const savedNames = JSON.parse(localStorage.getItem("schockenPlayers") || "[]");
 
-          const savedNames = JSON.parse(localStorage.getItem("schockenPlayers") || "[]");
+    document.getElementById("nameInputs").innerHTML = "";
+    savedNames.forEach(name => addPlayer(name));
 
-        savedNames.forEach(name => addPlayer(name));
+    document.getElementById("setup").style.display = "block";
+    document.getElementById("game").style.display = "none";
 
-        roundNumber = 0;
-        history = [];
-        }
+    roundNumber = 0;
+    history = [];
+}
     </script>
 </body>
 </html>
