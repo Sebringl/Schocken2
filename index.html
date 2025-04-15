@@ -163,7 +163,7 @@
     } else if (a === b && b === c) {
         label = `Pasch ${a}${b}${c}`;
         tier = 2; subvalue = a;
-    } else if ((a - b === 1 && b - c === 1) || (a === 4 && b === 2 && c === 1)) {
+    } else if ((a - b === 1 && b - c === 1) {
         label = "Straße";
         tier = 1; subvalue = a;
     } else {
@@ -206,7 +206,7 @@
             localStorage.setItem("schockenWinner", list[0].name);
             let html = "<h3>Ergebnisse</h3><ol>";
             list.forEach(e => {
-                html += `<li>${e.name}: ${e.label} <small>(Würfe: ${e.throws})</small></li>`;
+                html += `<li>${e.name}: ${e.label} <small>(${e.throws})</small></li>`;
             });
             html += "</ol>";
             document.getElementById("leaderboard").innerHTML = html;
