@@ -48,6 +48,7 @@
     let throwCount = 0, dice = [null, null, null], held = [false, false, false], convertible = [false, false, false];
     let diceSymbols = ['⚀', '⚁', '⚂', '⚃', '⚄', '⚅'], roundNumber = 0, history = [];
     let wins = [];
+    let startPlayerIndex = 0;
 
     function addPlayer(name = "") {
       const index = document.querySelectorAll("#nameInputs .playerEntry").length;
@@ -156,6 +157,10 @@
         wins[list[0].playerIndex]++;
         localStorage.setItem("schockenWinner", list[0].name);
 
+          // Startspieler der nächsten Runde: Verlierer (letzter in sortierter Liste)
+        const loser = list[list.length - 1];
+        startPlayerIndex = loser.playerIndex;
+
         prepareNextRound(); // Starte nächste Runde
         updateHistoryTable(); // Zeige aktualisierte Sieg-Kronen in Tabelle
     } else {
@@ -170,7 +175,7 @@
 }
 
         function prepareNextRound() {
-            throwCount = 0; currentPlayer = 0;
+            throwCount = 0; currentPlayer = startPlayerIndex;;
             scores = new Array(players.length).fill(null); dice = [null, null, null];
             held = [false, false, false]; convertible = [false, false, false];
             document.getElementById("result").textContent = "";
