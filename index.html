@@ -151,11 +151,20 @@
                 }
             }
 
-
-   
-    function rateRoll(dice, throws, playerIndex) {
+        function rateRoll(dice, throws, playerIndex) {
     const [a, b, c] = dice.slice().sort((x, y) => y - x);
     let label, tier, subvalue;
+
+    if (dice.includes(null)) {
+        return {
+            label: "Ungültiger Wurf",
+            value: 0,
+            tier: -1,
+            subvalue: 0,
+            throws,
+            playerIndex
+        };
+    }
 
     if (a === 1 && b === 1 && c === 1) {
         label = "Schock Out";
@@ -164,7 +173,7 @@
         label = `Schock ${c}`;
         tier = 3; subvalue = c;
     } else if (a === b && b === c) {
-        label = `Pasch`;
+        label = `Pasch ${a}${b}${c}`;
         tier = 2; subvalue = a;
     } else if (a - b === 1 && b - c === 1) {
         label = "Straße";
@@ -183,6 +192,8 @@
         playerIndex
     };
 }
+   
+
 
 
             function updateHistoryTable() {
