@@ -219,25 +219,26 @@
             document.getElementById("endTurnBtn").disabled = true;
             document.getElementById("rollBtn").textContent = `Würfeln (${maxThrowsThisRound})`;
         }
+function updateDiceDisplay() {
+    for (let i = 0; i < 3; i++) {
+        const el = document.getElementById("die" + i);
+        el.textContent = (dice[i] === null) ? "□" : diceSymbols[dice[i] - 1];
+        el.className = "die";
+        if (held[i]) el.classList.add("held");
+    }
 
-        function updateDiceDisplay() {
-            for (let i = 0; i < 3; i++) {
-                const el = document.getElementById("die" + i);
-                el.textContent = (dice[i] === null) ? "□" : diceSymbols[dice[i] - 1];
-                el.className = "die";
-            if (held[i]) el.classList.add("held");
-                }
-        // Anzeige im Würfeln-Button aktualisieren
-        const remaining = maxThrowsThisRound - throwCount;
-        const rollBtn = document.getElementById("rollBtn");
+    // Anzeige im Würfeln-Button aktualisieren
+    const remaining = maxThrowsThisRound - throwCount;
+    const rollBtn = document.getElementById("rollBtn");
 
-        if (remaining > 0) {
-            rollBtn.textContent = `Würfeln (${remaining})`;
-        } else {
-            rollBtn.textContent = "Würfeln";
-          }            
-            }
-        }
+    if (remaining > 0) {
+        rollBtn.textContent = `Würfeln (${remaining})`;
+        rollBtn.disabled = false;
+    } else {
+        rollBtn.textContent = "Würfeln";
+        rollBtn.disabled = true;
+    }
+}
 
         function rateRoll(dice, throws, playerIndex) {
             const [a, b, c] = dice.slice().sort((x, y) => y - x);
