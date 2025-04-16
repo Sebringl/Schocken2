@@ -366,7 +366,7 @@ function updateDiceDisplay() {
         rollBtn.textContent = `Würfeln (${remaining})`;
         rollBtn.disabled = false;
     } else {
-        rollBtn.textContent = "Würfeln";
+        rollBtn.textContent = `Würfeln (${remaining})`;
         rollBtn.disabled = true;
     }
 
@@ -374,7 +374,7 @@ function updateDiceDisplay() {
       rollBtn.textContent = `Würfeln (${remaining})`;
       rollBtn.disabled = false;
     } else {
-      rollBtn.textContent = "Würfeln";
+      rrollBtn.textContent = `Würfeln (${remaining})`;
       rollBtn.disabled = true;
     } 
     const endBtn = document.getElementById("endTurnBtn");
