@@ -505,7 +505,8 @@ if (currentRound) {
       let labelClass = "";
 
       const isCurrentRound = (i === history.length - 1);
-      const isNextPlayer = isCurrentRound && playerIndex === ((startPlayerIndex + playerTurnIndex) % players.length);
+      const isNextPlayer = isCurrentRound && j === ((startPlayerIndex + playerTurnIndex) % players.length);
+
 
 
       if (isNextPlayer) {
