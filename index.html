@@ -289,11 +289,12 @@ function toggleHoldOrConvert(index) {
         }
 
     function nextPlayer() {
-      playerTurnIndex++;
-
-      if (playerTurnIndex < players.length) {
-        // Bestimme nächsten Spieler im Uhrzeigersinn ab Startspieler
-        currentPlayer = (startPlayerIndex + playerTurnIndex) % players.length;
+if (playerTurnIndex === 0) {
+  currentPlayer = startPlayerIndex;
+} else {
+  currentPlayer = (startPlayerIndex + playerTurnIndex) % players.length;
+}
+playerTurnIndex++;
 
         throwCount = 0;
         dice = [null, null, null];
