@@ -76,13 +76,24 @@
   .highlight-finalwinner {
     background-color: #ffe680 !important;
   }
+
+  .removeBtn {
+  font-size: 0.9em;
+  padding: 2px 8px;
+  height: 32px;
+  line-height: 1;
+  vertical-align: middle;
+  margin-left: 6px;
+  background: none;
+  border: 1px solid #ccc;
+  cursor: pointer;
+}
     
     
   </style>
 </head>
 <body>
   <div id="setup">
-    <p>Spieler:</p>
     <div id="nameInputs"></div>
     <button onclick="addPlayer()">+ Spieler hinzufügen</button>
     <br><br>
@@ -128,9 +139,8 @@
       const div = document.createElement("div");
       div.className = "playerEntry";
       div.innerHTML = `
-        Spieler ${index + 1}: 
         <input type="text" id="playerName${index}" value="${name || `Spieler ${index + 1}`}" />
-        <button onclick="removePlayer(this)">–</button>
+        <button class="removeBtn" onclick="removePlayer(this)">–</button>
       `;
 
       container.appendChild(div);
