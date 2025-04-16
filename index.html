@@ -193,32 +193,30 @@
       showPlayer(); updateDiceDisplay(); updateHistoryTable();
     }
 
- function toggleHoldOrConvert(index) {
-  if (dice[index] === null) return;
-
+if (dice[index] === 6 && !held[index] && convertible[index]) {
   const remainingThrows = maxThrowsThisRound - throwCount;
 
-  // Nur wenn die 6 konvertierbar ist (laut applyManualSixRule)
-  if (dice[index] === 6 && !held[index] && convertible[index]) {
-    if (remainingThrows <= 0) {
-      alert("In der letzten Wurfrunde dürfen keine Sechsen mehr getauscht werden.");
-      return;
-    }
-
-    if (convertedCount >= 2) {
-      alert("Du darfst maximal zwei Sechsen pro Runde in Einsen umwandeln.");
-      return;
-    }
-
-    dice[index] = 1;
-    // Achtung: NICHT automatisch festhalten
-    convertible[index] = false;
-    convertedCount++;
-    convertedThisTurn = true;
-
-    updateDiceDisplay();
+  if (remainingThrows <= 0) {
+    alert("In der letzten Wurfrunde dürfen keine Sechsen mehr getauscht werden.");
     return;
   }
+
+  const sixCount = dice.filter(d => d === 6).length;
+  const maxAllowed = sixCount === 3 ? 2 : 1;
+
+  if (convertedCount >= maxAllowed) {
+    alert(`Du darfst bei diesem Wurf nur ${maxAllowed} Sechs${maxAllowed === 1 ? "" : "en"} drehen.`);
+    return;
+  }
+
+  dice[index] = 1;
+  convertible[index] = false;
+  convertedCount++;
+  convertedThisTurn = true;
+
+  updateDiceDisplay();
+  return;
+}
 
   // Normales Halten/Umschalten
   held[index] = !held[index];
@@ -246,19 +244,15 @@
 function applyManualSixRule(dice) {
   convertible = [false, false, false];
 
-  const sixPositions = [];
-  for (let i = 0; i < dice.length; i++) {
-    if (dice[i] === 6) {
-      sixPositions.push(i);
+  const sixCount = dice.filter(d => d === 6).length;
+
+  // Nur wenn 2 oder mehr Sechsen vorhanden sind, dürfen sie markiert werden
+  if (sixCount >= 2) {
+    for (let i = 0; i < 3; i++) {
+      if (dice[i] === 6) {
+        convertible[i] = true;
+      }
     }
-  }
-
-  if (sixPositions.length < 2) return;
-
-  const limit = sixPositions.length === 2 ? 1 : 2;
-
-  for (let i = 0; i < limit; i++) {
-    convertible[sixPositions[i]] = true;
   }
 }
 
