@@ -249,14 +249,12 @@ function applyManualSixRule(dice) {
     .filter(d => d.val === 6)
     .map(d => d.i);
 
-  // Neue Regel: nur wenn mindestens 2 Sechsen vorhanden sind
-  if (sixIndexes.length < 2) {
-    convertible = [false, false, false];
-    return;
-  }
-
-  const maxConvertible = Math.min(2, sixIndexes.length);
   convertible = [false, false, false];
+
+  if (sixIndexes.length < 2) return;
+
+  // Nur eine Sechs darf gedreht werden, wenn zwei geworfen wurden
+  const maxConvertible = sixIndexes.length === 2 ? 1 : 2;
 
   for (let i = 0; i < maxConvertible; i++) {
     convertible[sixIndexes[i]] = true;
