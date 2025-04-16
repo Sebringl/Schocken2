@@ -475,40 +475,42 @@ function updateHistoryTable() {
   });
   html += "</tr>";
 
-  // Rundenverlauf (neueste Runde oben)
+  // Rundenverlauf (neueste Runde zuerst)
   for (let i = history.length - 1; i >= 0; i--) {
     const r = history[i];
     html += `<tr><td>${i + 1}</td>`;
 
     const currentRound = (i === history.length - 1);
 
+    // Finde nächsten Spieler, der noch keinen Eintrag hat
     let nextPlayerInRound = null;
     if (currentRound) {
       for (let p = 0; p < players.length; p++) {
         if (!r[p]) {
           nextPlayerInRound = p;
-        break;
+          break;
+        }
       }
     }
-  }
 
+    // Schleife durch alle Spieler
     for (let j = 0; j < players.length; j++) {
       const entry = r[j];
       let labelClass = "";
 
-let labelClass = "";
-if (j === nextPlayerInRound && currentRound) {
-  labelClass = "highlight-current";
-}
+      if (j === nextPlayerInRound && currentRound) {
+        labelClass = "highlight-current";
+      }
 
-if (entry) {
-  html += `<td class="${labelClass}">${entry.label}</td>`;
-  html += `<td class="${labelClass}" style="text-align:center;">${entry.throws}</td>`;
-} else {
-  html += `<td class="${labelClass}"></td><td class="${labelClass}"></td>`;
-}
+      if (entry) {
+        html += `<td class="${labelClass}">${entry.label}</td>`;
+        html += `<td class="${labelClass}" style="text-align:center;">${entry.throws}</td>`;
+      } else {
+        html += `<td class="${labelClass}"></td><td class="${labelClass}"></td>`;
+      }
+    }
 
-    html += "</tr>"; 
+    html += "</tr>";
   }
 
   html += "</table>";
