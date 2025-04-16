@@ -455,7 +455,7 @@ function updateHistoryTable() {
     // Rundenverlauf
     history.forEach((r, i) => {
         html += `<tr><td>${i + 1}</td>`;
-      const currentRound = (i === roundNumber - 1);
+      const currentRound = (i === history.length - 1);
       const currentBest = currentRound ? getRoundBestPlayerIndex(r) : null;
       const finalBest = (!currentRound && r.length) ? getRoundWinner(r) : null;
 
