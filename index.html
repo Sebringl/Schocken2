@@ -299,6 +299,8 @@ function toggleHoldOrConvert(index) {
         dice = [null, null, null];
         held = [false, false, false];
         convertible = [false, false, false];
+        convertedThisTurn = false;
+        convertedCount = 0;
 
         updateDiceDisplay();
         showPlayer();
@@ -332,6 +334,8 @@ function toggleHoldOrConvert(index) {
             currentPlayer = startPlayerIndex;
             scores = new Array(players.length).fill(null); dice = [null, null, null];
             held = [false, false, false]; convertible = [false, false, false];
+            convertedThisTurn = false;
+            convertedCount = 0;
             document.getElementById("result").textContent = "";
             //document.getElementById("throwCount").textContent = "Wurf: 0";
             maxThrowsThisRound = 3; history.push(new Array(players.length).fill(null)); roundNumber++;
