@@ -198,40 +198,40 @@ function toggleHoldOrConvert(index) {
 
   const remainingThrows = maxThrowsThisRound - throwCount;
 
-  // Spezielle Sechser-Logik
-  if (dice[index] === 6 && !held[index]) {
-    if (convertible[index]) {
-      // → Versuch, eine drehbare Sechs zu drehen
-      if (remainingThrows <= 0) {
-        alert("In der letzten Wurfrunde dürfen keine Sechsen mehr getauscht werden.");
-        return;
-      }
+  // Fall 1: Du klickst auf eine 6, die konvertierbar ist
+  if (dice[index] === 6 && !held[index] && convertible[index]) {
+    if (remainingThrows <= 0) {
+      alert("In der letzten Wurfrunde dürfen keine Sechsen mehr getauscht werden.");
+      return;
+    }
 
-      const sixCount = dice.filter((d, i) => d === 6 && !held[i]).length;
-      const maxAllowed = sixCount === 3 ? 2 : 1;
+    const sixCount = dice.filter((d, i) => d === 6 && !held[i]).length;
+    const maxAllowed = sixCount === 3 ? 2 : 1;
 
-      if (convertedCount >= maxAllowed) {
-        alert(`Du darfst bei diesem Wurf nur ${maxAllowed} Sechs${maxAllowed === 1 ? "" : "en"} drehen.`);
-        return;
-      }
-
-      // Drehung durchführen
-      dice[index] = 1;
-      convertible[index] = false;
-      convertedCount++;
-      convertedThisTurn = true;
-
+    if (convertedCount >= maxAllowed) {
+      // ❗ statt abbrechen → einfach normal halten!
+      held[index] = true;
       updateDiceDisplay();
       return;
     }
 
-    // → Sechs ist nicht drehbar, aber darf gehalten werden
-    held[index] = true;
+    // Drehung durchführen
+    dice[index] = 1;
+    convertible[index] = false;
+    convertedCount++;
+    convertedThisTurn = true;
     updateDiceDisplay();
     return;
   }
 
-  // Normales Halten/Umschalten für alle anderen Zahlen
+  // Fall 2: Sechs ist nicht drehbar – aber kann gehalten werden
+  if (dice[index] === 6 && !convertible[index]) {
+    held[index] = !held[index];
+    updateDiceDisplay();
+    return;
+  }
+
+  // Alle anderen normalen Fälle
   held[index] = !held[index];
   updateDiceDisplay();
 }
