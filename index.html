@@ -78,7 +78,7 @@
   line-height: 1;
   vertical-align: middle;
   margin-left: 6px;
-  //background: none;
+  /* background: none; */
   border: 1px solid #ccc;
   border-radius: 4px;
   cursor: pointer;
@@ -498,7 +498,7 @@ function updateHistoryTable() {
             html += `<td class="${labelClass}" style="text-align:center;">${entry ? entry.throws : ""}</td>`;
           }
         html += "</tr>";  
-    });
+    };
 
     html += "</table>";
     document.getElementById("historyTable").innerHTML = html;
