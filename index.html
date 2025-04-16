@@ -198,7 +198,7 @@ function toggleHoldOrConvert(index) {
 
   const remainingThrows = maxThrowsThisRound - throwCount;
 
-  // Sechser-Klickregel
+  // Konvertierbare Sechs drehen
   if (dice[index] === 6 && !held[index] && convertible[index]) {
     if (remainingThrows <= 0) {
       alert("In der letzten Wurfrunde dürfen keine Sechsen mehr getauscht werden.");
@@ -222,7 +222,7 @@ function toggleHoldOrConvert(index) {
     return;
   }
 
-  // Normales Halten/Umschalten
+  // Normales Halten/Umschalten (auch für nicht-drehbare Sechsen!)
   held[index] = !held[index];
   updateDiceDisplay();
 }
