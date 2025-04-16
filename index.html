@@ -216,19 +216,6 @@
       }
     }
 
-    // Sieger bekommt Krone
-    wins[list[0].playerIndex]++;
-    localStorage.setItem("schockenWinner", list[0].name);
-
-    // Verlierer beginnt neue Runde
-    const loser = list[list.length - 1];
-    startPlayerIndex = loser.playerIndex;
-
-    prepareNextRound();
-    updateHistoryTable();
-  }
-}
-
         function prepareNextRound() {
             throwCount = 0; currentPlayer = startPlayerIndex; playerTurnIndex = 0;
             scores = new Array(players.length).fill(null); dice = [null, null, null];
