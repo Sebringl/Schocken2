@@ -69,13 +69,7 @@
     background-color: #eeeeee !important;
   }
 
-  .highlight-roundbest {
-    background-color: #fff4b8 !important;
-  }
 
-  .highlight-finalwinner {
-    background-color: #ffe680 !important;
-  }
 
   .removeBtn {
   font-size: 16px;
@@ -495,24 +489,14 @@ function updateHistoryTable() {
           const entry = r[j];
           let labelClass = "";
           if (entry) {
-              if (entry) {
-    if (j === currentBest && currentRound) {
-        labelClass = "highlight-roundbest";
-    } else if (currentPlayer === j && currentRound) {
-        labelClass = "highlight-current";
-    }
-
-    if (j === finalBest && !currentRound) {
-        labelClass = "highlight-finalwinner";
-    }
-}
-              if (j === finalBest && !currentRound) labelClass = "highlight-finalwinner";
+            if (entry) {
+              if (currentPlayer === j && currentRound) {
+                  labelClass = "highlight-current";
+              }
+            }
+            html += `<td class="${labelClass}">${entry ? entry.label : ""}</td>`;
+            html += `<td class="${labelClass}" style="text-align:center;">${entry ? entry.throws : ""}</td>`;
           }
-
-          html += `<td class="${labelClass}">${entry ? entry.label : ""}</td>`;
-          html += `<td class="${labelClass}" style="text-align:center;">${entry ? entry.throws : ""}</td>`;
-      }
-
         html += "</tr>";  
     });
 
