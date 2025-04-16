@@ -91,10 +91,12 @@
   </div>
 
   <div id="game" style="display:none;">
-    <span id="playerControl">
-    <span id="playerDisplay"></span>
-    <button id="rotateBtn" onclick="rotatePlayer()" title="Nächster Spieler">🔄</button>
-    </span>
+    <div id="playerControl" style="margin-top: 20px;">
+      <h1 id="playerDisplay" style="font-size: 2em; margin-bottom: 0;">Am Zug: Spieler 1</h1>
+      <div style="text-align: center; margin-top: 5px;">
+      <button id="rotateBtn" onclick="rotatePlayer()" title="Nächster Spieler">🔄</button>
+    </div>
+    </div>
     <div class="dice-container">
       <div class="die" id="die0" onclick="toggleHoldOrConvert(0)">⚀</div>
       <div class="die" id="die1" onclick="toggleHoldOrConvert(1)">⚀</div>
@@ -213,7 +215,7 @@
             let rolled = [];
             for (let i = 0; i < 3; i++) if (!held[i]) { dice[i] = rollDie(); rolled.push(i); }
             throwCount++; applyManualSixRule(rolled);  updateDiceDisplay(); 
-            document.getElementById("throwCount").textContent = `Wurf: ${throwCount}`;
+            //document.getElementById("throwCount").textContent = `Wurf: ${throwCount}`;
             document.getElementById("endTurnBtn").disabled = false;
             
             if (throwCount >= maxThrowsThisRound) { document.getElementById("rollBtn").disabled = true; }
@@ -414,7 +416,7 @@ function updateHistoryTable() {
   
     if (!history.length) return;
 
-    //let html = "<h3>Punkteverlauf</h3><table border='1' style='margin:auto; border-collapse:collapse;'>";
+    let html = "<h3></h3><table border='1' style='margin:auto; border-collapse:collapse;'>";
 
     // Kopfzeile mit Spielernamen + Siegen
     html += "<tr><th rowspan='2'>Runde</th>";
