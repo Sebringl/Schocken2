@@ -243,22 +243,25 @@
             if (throwCount >= maxThrowsThisRound) { document.getElementById("rollBtn").disabled = true; }
         }
 
-      function applyManualSixRule(rolled) {
-      // Ermittle, wie viele Sechsen im aktuellen Wurf enthalten sind
-      const sixIndexes = rolled
-        .map((val, i) => ({ val, i }))
-            .filter(d => d.val === 6)
-        .map(d => d.i);
+function applyManualSixRule(dice) {
+  const sixIndexes = dice
+    .map((val, i) => ({ val, i }))
+    .filter(d => d.val === 6)
+    .map(d => d.i);
 
-      // Erlaube maximal zwei Konvertierungen
-      const maxConvertible = Math.min(2, sixIndexes.length);
+  // Neue Regel: nur wenn mindestens 2 Sechsen vorhanden sind
+  if (sixIndexes.length < 2) {
+    convertible = [false, false, false];
+    return;
+  }
 
-      // Setze Konvertierbarkeit
-      convertible = [false, false, false];
-      for (let i = 0; i < maxConvertible; i++) {
-        convertible[sixIndexes[i]] = true;
-      }
-    }
+  const maxConvertible = Math.min(2, sixIndexes.length);
+  convertible = [false, false, false];
+
+  for (let i = 0; i < maxConvertible; i++) {
+    convertible[sixIndexes[i]] = true;
+  }
+}
 
         function rotatePlayer() {
           if (!manualRotationMode) return;
