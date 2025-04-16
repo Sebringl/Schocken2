@@ -193,29 +193,38 @@
       showPlayer(); updateDiceDisplay(); updateHistoryTable();
     }
 
-if (dice[index] === 6 && !held[index] && convertible[index]) {
+function toggleHoldOrConvert(index) {
+  if (dice[index] === null) return;
+
   const remainingThrows = maxThrowsThisRound - throwCount;
 
-  if (remainingThrows <= 0) {
-    alert("In der letzten Wurfrunde dürfen keine Sechsen mehr getauscht werden.");
+  // Sechser-Klickregel
+  if (dice[index] === 6 && !held[index] && convertible[index]) {
+    if (remainingThrows <= 0) {
+      alert("In der letzten Wurfrunde dürfen keine Sechsen mehr getauscht werden.");
+      return;
+    }
+
+    const sixCount = dice.filter(d => d === 6).length;
+    const maxAllowed = sixCount === 3 ? 2 : 1;
+
+    if (convertedCount >= maxAllowed) {
+      alert(`Du darfst bei diesem Wurf nur ${maxAllowed} Sechs${maxAllowed === 1 ? "" : "en"} drehen.`);
+      return;
+    }
+
+    dice[index] = 1;
+    convertible[index] = false;
+    convertedCount++;
+    convertedThisTurn = true;
+
+    updateDiceDisplay();
     return;
   }
 
-  const sixCount = dice.filter(d => d === 6).length;
-  const maxAllowed = sixCount === 3 ? 2 : 1;
-
-  if (convertedCount >= maxAllowed) {
-    alert(`Du darfst bei diesem Wurf nur ${maxAllowed} Sechs${maxAllowed === 1 ? "" : "en"} drehen.`);
-    return;
-  }
-
-  dice[index] = 1;
-  convertible[index] = false;
-  convertedCount++;
-  convertedThisTurn = true;
-
+  // Normales Halten/Umschalten
+  held[index] = !held[index];
   updateDiceDisplay();
-  return;
 }
 
   // Normales Halten/Umschalten
