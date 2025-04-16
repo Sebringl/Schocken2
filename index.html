@@ -288,44 +288,45 @@ function toggleHoldOrConvert(index) {
             updateHistoryTable(); nextPlayer();
         }
 
-    function nextPlayer() {
-if (playerTurnIndex === 0) {
-  currentPlayer = startPlayerIndex;
-} else {
-  currentPlayer = (startPlayerIndex + playerTurnIndex) % players.length;
-}
-playerTurnIndex++;
-
-        throwCount = 0;
-        dice = [null, null, null];
-        held = [false, false, false];
-        convertible = [false, false, false];
-        convertedThisTurn = false;
-        convertedCount = 0;
-
-        updateDiceDisplay();
-        showPlayer();
-      } else {
-        // Runde beenden
-        let list = scores.map((s, i) => ({ name: players[i], playerIndex: i, ...s }));
-
-        list.sort((a, b) => {
-          if (a.tier !== b.tier) return b.tier - a.tier;
-          if (a.subvalue !== b.subvalue) return b.subvalue - a.subvalue;
-          if (a.throws !== b.throws) return a.throws - b.throws;
-          return a.playerIndex - b.playerIndex;
-        });
-
-        wins[list[0].playerIndex]++;
-        localStorage.setItem("schockenWinner", list[0].name);
-
-        const loser = list[list.length - 1];
-        startPlayerIndex = loser.playerIndex;
-
-        prepareNextRound();
-        updateHistoryTable();
-      }
+function nextPlayer() {
+  if (playerTurnIndex < players.length) {
+    if (playerTurnIndex === 0) {
+      currentPlayer = startPlayerIndex;
+    } else {
+      currentPlayer = (startPlayerIndex + playerTurnIndex) % players.length;
     }
+    playerTurnIndex++;
+
+    throwCount = 0;
+    dice = [null, null, null];
+    held = [false, false, false];
+    convertible = [false, false, false];
+    convertedThisTurn = false;
+    convertedCount = 0;
+
+    updateDiceDisplay();
+    showPlayer();
+  } else {
+    // Runde beenden
+    let list = scores.map((s, i) => ({ name: players[i], playerIndex: i, ...s }));
+
+    list.sort((a, b) => {
+      if (a.tier !== b.tier) return b.tier - a.tier;
+      if (a.subvalue !== b.subvalue) return b.subvalue - a.subvalue;
+      if (a.throws !== b.throws) return a.throws - b.throws;
+      return a.playerIndex - b.playerIndex;
+    });
+
+    wins[list[0].playerIndex]++;
+    localStorage.setItem("schockenWinner", list[0].name);
+
+    const loser = list[list.length - 1];
+    startPlayerIndex = loser.playerIndex;
+
+    prepareNextRound();
+    updateHistoryTable();
+  }
+}
 
         function prepareNextRound() {
             manualRotationMode = true;
