@@ -236,7 +236,7 @@
             if (throwCount >= maxThrowsThisRound) { document.getElementById("rollBtn").disabled = true; return; }
             let rolled = [];
             for (let i = 0; i < 3; i++) if (!held[i]) { dice[i] = rollDie(); rolled.push(i); }
-            throwCount++; applyManualSixRule(rolled);  updateDiceDisplay(); 
+            throwCount++; applyManualSixRule(dice);  updateDiceDisplay(); 
             //document.getElementById("throwCount").textContent = `Wurf: ${throwCount}`;
             document.getElementById("endTurnBtn").disabled = false;
             
