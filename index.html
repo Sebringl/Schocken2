@@ -483,15 +483,20 @@ function updateHistoryTable() {
     const currentRound = (i === history.length - 1);
 
     // Finde nächsten Spieler, der noch keinen Eintrag hat
-    let nextPlayerInRound = null;
-    if (currentRound) {
-      for (let p = 0; p < players.length; p++) {
-        if (!r[p]) {
-          nextPlayerInRound = p;
-          break;
-        }
+let nextPlayerInRound = null;
+if (currentRound) {
+  const allEmpty = r.every(e => !e);
+  if (allEmpty) {
+    nextPlayerInRound = currentPlayer;
+  } else {
+    for (let p = 0; p < players.length; p++) {
+      if (!r[p]) {
+        nextPlayerInRound = p;
+        break;
       }
     }
+  }
+}
 
     // Schleife durch alle Spieler
     for (let j = 0; j < players.length; j++) {
