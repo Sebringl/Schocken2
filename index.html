@@ -283,9 +283,9 @@ function endTurn() {
   updateHistoryTable();
 
   if (playerTurnIndex < players.length - 1) {
-    nextPlayer(); // nur wenn noch Spieler übrig sind
+    nextPlayer(); // ✅ nur wenn noch Spieler übrig sind
   }
-  // else nichts tun – nextPlayer() wird über prepareNextRound aufgerufen
+  // ❌ KEIN weiterer nextPlayer(), denn der kommt über prepareNextRound()
 }
 
 function nextPlayer() {
