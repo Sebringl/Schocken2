@@ -504,9 +504,13 @@ if (currentRound) {
       const entry = r[j];
       let labelClass = "";
 
-      if (j === nextPlayerInRound && currentRound) {
+      const isCurrentRound = (i === history.length - 1);
+      const isNextPlayer = isCurrentRound && playerIndex === ((startPlayerIndex + playerTurnIndex) % players.length);
+
+
+      if (isNextPlayer) {
         labelClass = "highlight-current";
-      }
+     }
 
       if (entry) {
         html += `<td class="${labelClass}">${entry.label}</td>`;
