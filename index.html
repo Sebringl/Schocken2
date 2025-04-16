@@ -480,14 +480,24 @@ function updateHistoryTable() {
     const r = history[i];
     html += `<tr><td>${i + 1}</td>`;
 
-    const currentRound = (i === history.length);
+    const currentRound = (i === history.length - 1);
+
+    let nextPlayerInRound = null;
+    if (currentRound) {
+      for (let p = 0; p < players.length; p++) {
+        if (!r[p]) {
+          nextPlayerInRound = p;
+        break;
+      }
+    }
+  }
 
     for (let j = 0; j < players.length; j++) {
       const entry = r[j];
       let labelClass = "";
 
       if (entry) {
-        if (currentPlayer === j && currentRound) {
+        if (j === nextPlayerInRound && currentRound) {
           labelClass = "highlight-current";
         }
         html += `<td class="${labelClass}">${entry.label}</td>`;
@@ -497,7 +507,7 @@ function updateHistoryTable() {
       }
     }
 
-    html += "</tr>"; // ✅ jetzt an der richtigen Stelle!
+    html += "</tr>"; 
   }
 
   html += "</table>";
