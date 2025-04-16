@@ -149,7 +149,7 @@
           if (dice[index] === 6 && !held[index]) {
           const remainingThrows = maxThrowsThisRound - throwCount;
 
-          if (remainingThrows <= 1) {
+          if (remainingThrows <= 0) {
             alert("In der letzten Wurfrunde dürfen keine Sechsen mehr getauscht werden.");
           return;
         }
