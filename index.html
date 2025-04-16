@@ -306,7 +306,7 @@ function updateDiceDisplay() {
 
         function rateRoll(dice, throws, playerIndex) {
             dice = dice.slice().sort((x, y) => y - x);
-            const [a, b, c];
+            const [a, b, c] = dice;
             let label, tier, subvalue;
 
             if (dice.includes(null)) {
