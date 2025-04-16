@@ -455,53 +455,55 @@ function getRoundWinner(round) {
     
 
 function updateHistoryTable() {
+  if (!history.length) return;
 
-  
-    if (!history.length) return;
+  let html = "<h3></h3><table border='1' style='margin:auto; border-collapse:collapse;'>";
 
-    let html = "<h3></h3><table border='1' style='margin:auto; border-collapse:collapse;'>";
+  // Kopfzeile mit Spielernamen + Siegen
+  html += "<tr><th rowspan='2'>Runde</th>";
+  players.forEach((name, i) => {
+    const winCount = wins[i];
+    const displayName = winCount > 0 ? `${name} (${winCount} 👑)` : name;
+    html += `<th colspan="2">${displayName}</th>`;
+  });
+  html += "</tr>";
 
-    // Kopfzeile mit Spielernamen + Siegen
-    html += "<tr><th rowspan='2'>Runde</th>";
-    players.forEach((name, i) => {
-        const winCount = wins[i];
-        const displayName = winCount > 0 ? `${name} (${winCount} 👑)` : name;
-        html += `<th colspan="2">${displayName}</th>`;
-    });
-    html += "</tr>";
+  // Unter-Kopfzeile
+  html += "<tr>";
+  players.forEach(() => {
+    html += "<th>🎲</th><th>🔁</th>";
+  });
+  html += "</tr>";
 
-    // Unter-Kopfzeile
-    html += "<tr>";
-    players.forEach(() => {
-      html += "<th>🎲</th><th>🔁</th>";
-    });
-    html += "</tr>";
+  // Rundenverlauf (neueste Runde oben)
+  for (let i = history.length - 1; i >= 0; i--) {
+    const r = history[i];
+    html += `<tr><td>${i + 1}</td>`;
 
-    // Rundenverlauf
-    for (let i = history.length - 1; i >= 0; i--) {
-      const r = history[i];
-        html += `<tr><td>${i + 1}</td>`;
-      const currentRound = (i === 0);
-      const currentBest = currentRound ? getRoundBestPlayerIndex(r) : null;
-      const finalBest = (!currentRound && r.length) ? getRoundWinner(r) : null;
+    const currentRound = (i === 0);
+    const currentBest = currentRound ? getRoundBestPlayerIndex(r) : null;
+    const finalBest = (!currentRound && r.length) ? getRoundWinner(r) : null;
 
-      for (let j = 0; j < players.length; j++) {
-          const entry = r[j];
-          let labelClass = "";
-          if (entry) {
-            if (entry) {
-              if (currentPlayer === j && currentRound) {
-                  labelClass = "highlight-current";
-              }
-            }
-            html += `<td class="${labelClass}">${entry ? entry.label : ""}</td>`;
-            html += `<td class="${labelClass}" style="text-align:center;">${entry ? entry.throws : ""}</td>`;
-          }
-        html += "</tr>";  
-    };
+    for (let j = 0; j < players.length; j++) {
+      const entry = r[j];
+      let labelClass = "";
 
-    html += "</table>";
-    document.getElementById("historyTable").innerHTML = html;
+      if (entry) {
+        if (currentPlayer === j && currentRound) {
+          labelClass = "highlight-current";
+        }
+        html += `<td class="${labelClass}">${entry.label}</td>`;
+        html += `<td class="${labelClass}" style="text-align:center;">${entry.throws}</td>`;
+      } else {
+        html += `<td></td><td></td>`;
+      }
+    }
+
+    html += "</tr>"; // ✅ jetzt an der richtigen Stelle!
+  }
+
+  html += "</table>";
+  document.getElementById("historyTable").innerHTML = html;
 }
 
 
