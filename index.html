@@ -137,6 +137,7 @@
     let convertedThisTurn = false;
     let convertedCount = 0;
     let manualRotationMode = true;
+    let maxConvertibleThisTurn = 0;
 
     function addPlayer(name = "") {
       const index = document.querySelectorAll("#nameInputs .playerEntry").length;
@@ -208,7 +209,7 @@ function toggleHoldOrConvert(index) {
     const sixCount = dice.filter((d, i) => d === 6 && !held[i]).length;
     const maxAllowed = sixCount === 3 ? 2 : 1;
 
-    if (convertedCount >= maxAllowed) {
+    if (convertedCount >= maxConvertibleThisTurn) {
       // ❗ statt abbrechen → einfach normal halten!
       held[index] = true;
       updateDiceDisplay();
@@ -254,9 +255,8 @@ function toggleHoldOrConvert(index) {
             if (throwCount >= maxThrowsThisRound) { document.getElementById("rollBtn").disabled = true; }
         }
 
-function applyManualSixRule(dice, held) {
+    function applyManualSixRule(dice, held) {
   convertible = [false, false, false];
-
   // Prüfe: Welche Sechsen wurden frisch geworfen (nicht gehalten)?
   const freshSixes = [];
   for (let i = 0; i < dice.length; i++) {
@@ -264,11 +264,14 @@ function applyManualSixRule(dice, held) {
       freshSixes.push(i);
     }
   }
-
   // Nur wenn mindestens 2 frische Sechsen: irgendwas drehbar
-  if (freshSixes.length < 2) return;
+  if (freshSixes.length < 2) {
+    maxConvertibleThisTurn = 0;
+    return;
+  }
 
-  // Jetzt: Alle frisch geworfenen Sechsen als potenziell drehbar markieren
+  maxConvertibleThisTurn = freshSixes.length === 3 ? 2 : 1;
+// Jetzt: Alle frisch geworfenen Sechsen als potenziell drehbar markieren
   for (let i of freshSixes) {
     convertible[i] = true;
   }
