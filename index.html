@@ -480,7 +480,7 @@ function updateHistoryTable() {
     const r = history[i];
     html += `<tr><td>${i + 1}</td>`;
 
-    const currentRound = (i === history.length - 1);
+    const currentRound = (i === history.length);
 
     for (let j = 0; j < players.length; j++) {
       const entry = r[j];
