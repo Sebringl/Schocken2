@@ -172,6 +172,10 @@
 
     function startGame() {
       const savedNames = [];
+      maxThrowsThisRound = 3;
+      throwCount = 0;
+      convertedThisTurn = false;
+      convertedCount = 0;
       players = [], roundNumber = 1, history = [[]];
       const nameInputs = document.querySelectorAll("#nameInputs input");
       for (let i = 0; i < nameInputs.length; i++) {
