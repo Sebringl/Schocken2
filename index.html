@@ -480,9 +480,7 @@ function updateHistoryTable() {
     const r = history[i];
     html += `<tr><td>${i + 1}</td>`;
 
-    const currentRound = (i === 0);
-    const currentBest = currentRound ? getRoundBestPlayerIndex(r) : null;
-    const finalBest = (!currentRound && r.length) ? getRoundWinner(r) : null;
+    const currentRound = (i === history.length - 1);
 
     for (let j = 0; j < players.length; j++) {
       const entry = r[j];
