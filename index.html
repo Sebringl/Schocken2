@@ -163,7 +163,7 @@
       scores = new Array(players.length).fill(null);
       wins = new Array(players.length).fill(0);
 
-      document.getElementById("roundDisplay").textContent = "Runde: " + roundNumber;
+      //document.getElementById("roundDisplay").textContent = "Runde: " + roundNumber;
       document.getElementById("setup").style.display = "none";
       document.getElementById("game").style.display = "block";
       showPlayer(); updateDiceDisplay(); updateHistoryTable();
@@ -299,7 +299,7 @@
         function showPlayer() {
             document.getElementById("playerDisplay").textContent = `Am Zug: ${players[currentPlayer]}`;
             document.getElementById("result").textContent = "";
-            document.getElementById("throwCount").textContent = "Wurf: 0";
+            //document.getElementById("throwCount").textContent = "Wurf: 0";
             document.getElementById("rollBtn").disabled = false;
             document.getElementById("endTurnBtn").disabled = true;
             document.getElementById("rollBtn").textContent = `Würfeln (${maxThrowsThisRound})`;
@@ -414,7 +414,7 @@ function updateHistoryTable() {
   
     if (!history.length) return;
 
-    let html = "<h3>Punkteverlauf</h3><table border='1' style='margin:auto; border-collapse:collapse;'>";
+    //let html = "<h3>Punkteverlauf</h3><table border='1' style='margin:auto; border-collapse:collapse;'>";
 
     // Kopfzeile mit Spielernamen + Siegen
     html += "<tr><th rowspan='2'>Runde</th>";
