@@ -295,6 +295,13 @@ function updateDiceDisplay() {
       rollBtn.textContent = "Würfeln";
       rollBtn.disabled = true;
     } 
+    const endBtn = document.getElementById("endTurnBtn");
+      if (convertedThisTurn && throwCount === 0) {
+      endBtn.disabled = true;
+    } else {
+      endBtn.disabled = false;
+    }
+  
 }
 
         function rateRoll(dice, throws, playerIndex) {
