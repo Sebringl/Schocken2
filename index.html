@@ -88,7 +88,7 @@
     let throwCount = 0, dice = [null, null, null], held = [false, false, false], convertible = [false, false, false];
     let diceSymbols = ['⚀', '⚁', '⚂', '⚃', '⚄', '⚅'], roundNumber = 0, history = [];
     let wins = [];
-    let startPlayerIndex = 0;
+    let startPlayerIndex = 0, playerTurnIndex = 0; 
 
     function addPlayer(name = "") {
       const index = document.querySelectorAll("#nameInputs .playerEntry").length;
@@ -180,26 +180,41 @@
             updateHistoryTable(); nextPlayer();
         }
 
-function nextPlayer() {
-  if (currentPlayer < players.length - 1) {
-    // Nächster Spieler
-    currentPlayer++;
-    throwCount = 0;
-    dice = [null, null, null];
-    held = [false, false, false];
-    convertible = [false, false, false];
-    updateDiceDisplay();
-    showPlayer();
-  } else {
-    // Letzter Spieler war dran → Runde beenden
-    let list = scores.map((s, i) => ({ name: players[i], playerIndex: i, ...s }));
+    function nextPlayer() {
+      playerTurnIndex++;
 
-    list.sort((a, b) => {
-      if (a.tier !== b.tier) return b.tier - a.tier;
-      if (a.subvalue !== b.subvalue) return b.subvalue - a.subvalue;
-      if (a.throws !== b.throws) return a.throws - b.throws;
-      return a.playerIndex - b.playerIndex;
-    });
+      if (playerTurnIndex < players.length) {
+        // Bestimme nächsten Spieler im Uhrzeigersinn ab Startspieler
+        currentPlayer = (startPlayerIndex + playerTurnIndex) % players.length;
+
+        throwCount = 0;
+        dice = [null, null, null];
+        held = [false, false, false];
+        convertible = [false, false, false];
+
+        updateDiceDisplay();
+        showPlayer();
+      } else {
+        // Runde beenden
+        let list = scores.map((s, i) => ({ name: players[i], playerIndex: i, ...s }));
+
+        list.sort((a, b) => {
+          if (a.tier !== b.tier) return b.tier - a.tier;
+          if (a.subvalue !== b.subvalue) return b.subvalue - a.subvalue;
+          if (a.throws !== b.throws) return a.throws - b.throws;
+          return a.playerIndex - b.playerIndex;
+        });
+
+        wins[list[0].playerIndex]++;
+        localStorage.setItem("schockenWinner", list[0].name);
+
+        const loser = list[list.length - 1];
+        startPlayerIndex = loser.playerIndex;
+
+        prepareNextRound();
+        updateHistoryTable();
+      }
+    }
 
     // Sieger bekommt Krone
     wins[list[0].playerIndex]++;
@@ -215,14 +230,14 @@ function nextPlayer() {
 }
 
         function prepareNextRound() {
-            throwCount = 0; currentPlayer = startPlayerIndex;
+            throwCount = 0; currentPlayer = startPlayerIndex; playerTurnIndex = 0;
             scores = new Array(players.length).fill(null); dice = [null, null, null];
             held = [false, false, false]; convertible = [false, false, false];
             document.getElementById("result").textContent = "";
             document.getElementById("throwCount").textContent = "Wurf: 0";
             maxThrowsThisRound = 3; history.push(new Array(players.length).fill(null)); roundNumber++;
             document.getElementById("roundDisplay").textContent = "Runde: " + roundNumber;
-            showPlayer(); updateDiceDisplay();
+            showPlayer(); updateDiceDisplay();   
         }
 
         function showPlayer() {
