@@ -8,7 +8,7 @@
     html { font-size: 20px; }
     body { font-family: Arial, sans-serif; text-align: center; padding: 30px; max-width: 700px; margin: auto; }
     .dice-container { display: flex; justify-content: center; gap: 20px; margin: 20px 0; }
-    .die { font-size: 150px; cursor: pointer; padding: 15px; border: 3px solid transparent; border-radius: 10px; }
+    .die { font-size: 150px; cursor: pointer; padding: 15px; border: 2px solid transparent; border-radius: 10px; }
     .held { border-color: green; background-color: #eaffea; }
     button { padding: 12px 24px; font-size: 18px; margin: 10px; }
     input { font-size: 18px; padding: 5px 10px; margin: 5px; }
@@ -67,7 +67,10 @@
   </div>
 
   <div id="game" style="display:none;">
-    <div id="playerDisplay"></div>
+    <span id="playerControl">
+    <span id="playerDisplay"></span>
+    <button id="rotateBtn" onclick="rotatePlayer()" title="Nächster Spieler">🔄</button>
+    </span>
     <div class="dice-container">
       <div class="die" id="die0" onclick="toggleHoldOrConvert(0)">⚀</div>
       <div class="die" id="die1" onclick="toggleHoldOrConvert(1)">⚀</div>
@@ -91,6 +94,7 @@
     let startPlayerIndex = 0, playerTurnIndex = 0;
     let convertedThisTurn = false;
     let convertedCount = 0;
+    let manualRotationMode = true;
 
     function addPlayer(name = "") {
       const index = document.querySelectorAll("#nameInputs .playerEntry").length;
@@ -196,6 +200,12 @@
                 convertible[sixes[0]] = true;
                 if (sixes.length >= 3) convertible[sixes[1]] = true;
             }
+        }
+
+        function rotatePlayer() {
+          if (!manualRotationMode) return;
+          currentPlayer = (currentPlayer + 1) % players.length;
+        showPlayer();
         }
 
         function endTurn() {
