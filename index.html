@@ -277,16 +277,16 @@ function toggleHoldOrConvert(index) {
         showPlayer();
         }
 
-        function endTurn() {
-            if (currentPlayer === 0 && throwCount > 0) maxThrowsThisRound = Math.min(3, throwCount);
-            const score = rateRoll(dice, throwCount, currentPlayer);
-            scores[currentPlayer] = score;
-            history[roundNumber - 1][currentPlayer] = {
-                label: score.label,
-                throws: score.throws
-            };
-            updateHistoryTable(); nextPlayer();
-        }
+function endTurn() {
+  scores[currentPlayer] = rateRoll(dice, throwCount, currentPlayer);
+  history[history.length - 1][currentPlayer] = scores[currentPlayer];
+  updateHistoryTable();
+
+  if (playerTurnIndex < players.length - 1) {
+    nextPlayer(); // nur wenn noch Spieler übrig sind
+  }
+  // else nichts tun – nextPlayer() wird über prepareNextRound aufgerufen
+}
 
 function nextPlayer() {
   if (playerTurnIndex < players.length) {
