@@ -21,6 +21,23 @@
       font-size: 0.9rem;
     }
 
+    #rotateBtn {
+  background: none;
+  border: none;
+  font-size: 1.2em;
+  cursor: pointer;
+  padding: 0;
+  margin-left: 8px;
+  vertical-align: middle;
+}
+#rotateBtn:disabled {
+  opacity: 0.3;
+  cursor: default;
+}
+#rotateBtn:hover:not(:disabled) {
+  transform: scale(1.1);
+}
+
   #historyTable th, #historyTable td {
       border: 1px solid #ccc;
       padding: 4px 8px;
@@ -181,6 +198,8 @@
         function rollDie() { return Math.floor(Math.random() * 6) + 1; }
 
         function rollDice() {
+            manualRotationMode = false;
+            document.getElementById("rotateBtn").disabled = true;
             convertedThisTurn = false;
             convertedCount = 0;
             if (throwCount >= maxThrowsThisRound) { document.getElementById("rollBtn").disabled = true; return; }
@@ -256,6 +275,8 @@
     }
 
         function prepareNextRound() {
+            manualRotationMode = true;
+            document.getElementById("rotateBtn").disabled = false;
             throwCount = 0; 
             playerTurnIndex = 0;
             currentPlayer = startPlayerIndex;
