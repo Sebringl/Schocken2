@@ -141,38 +141,37 @@
       showPlayer(); updateDiceDisplay(); updateHistoryTable();
     }
 
-        function toggleHoldOrConvert(index) {
-        // Kein Würfel? → raus
-        if (dice[index] === null) return;
+ function toggleHoldOrConvert(index) {
+  if (dice[index] === null) return;
 
-        // Sechser tauschen?
-          if (dice[index] === 6 && !held[index]) {
-          const remainingThrows = maxThrowsThisRound - throwCount;
+  const remainingThrows = maxThrowsThisRound - throwCount;
 
-          if (remainingThrows <= 0) {
-            alert("In der letzten Wurfrunde dürfen keine Sechsen mehr getauscht werden.");
-          return;
-        }
-
-        if (convertedCount >= 2) {
-          alert("Du darfst maximal zwei Sechsen pro Runde in Einsen umwandeln.");
-          return;
-        }
-
-        dice[index] = 1;
-        held[index] = true;
-        convertible[index] = false;
-        convertedCount++;
-        convertedThisTurn = true;
-
-        updateDiceDisplay();
-        return;
-      }
-
-      // Normales Umschalten (halten oder nicht)
-      held[index] = !held[index];
-      updateDiceDisplay();
+  // Nur wenn die 6 konvertierbar ist (laut applyManualSixRule)
+  if (dice[index] === 6 && !held[index] && convertible[index]) {
+    if (remainingThrows <= 0) {
+      alert("In der letzten Wurfrunde dürfen keine Sechsen mehr getauscht werden.");
+      return;
     }
+
+    if (convertedCount >= 2) {
+      alert("Du darfst maximal zwei Sechsen pro Runde in Einsen umwandeln.");
+      return;
+    }
+
+    dice[index] = 1;
+    // Achtung: NICHT automatisch festhalten
+    convertible[index] = false;
+    convertedCount++;
+    convertedThisTurn = true;
+
+    updateDiceDisplay();
+    return;
+  }
+
+  // Normales Halten/Umschalten
+  held[index] = !held[index];
+  updateDiceDisplay();
+}
   
 
         function rollDie() { return Math.floor(Math.random() * 6) + 1; }
