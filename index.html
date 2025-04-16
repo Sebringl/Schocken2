@@ -257,7 +257,7 @@ function toggleHoldOrConvert(index) {
 function applyManualSixRule(dice, held) {
   convertible = [false, false, false];
 
-  // Zähle nur neu geworfene Sechsen (nicht gehalten)
+  // Prüfe: Welche Sechsen wurden frisch geworfen (nicht gehalten)?
   const freshSixes = [];
   for (let i = 0; i < dice.length; i++) {
     if (dice[i] === 6 && !held[i]) {
@@ -265,12 +265,12 @@ function applyManualSixRule(dice, held) {
     }
   }
 
-  if (freshSixes.length < 2) return; // Regel: mindestens 2 neue Sechsen nötig
+  // Nur wenn mindestens 2 frische Sechsen: irgendwas drehbar
+  if (freshSixes.length < 2) return;
 
-  const maxAllowed = freshSixes.length === 3 ? 2 : 1;
-
-  for (let i = 0; i < Math.min(maxAllowed, freshSixes.length); i++) {
-    convertible[freshSixes[i]] = true;
+  // Jetzt: Alle frisch geworfenen Sechsen als potenziell drehbar markieren
+  for (let i of freshSixes) {
+    convertible[i] = true;
   }
 }
 
