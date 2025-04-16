@@ -323,7 +323,6 @@ function toggleHoldOrConvert(index) {
 
         prepareNextRound();
         updateHistoryTable();
-        updateDiceDisplay();
       }
     }
 
@@ -355,40 +354,37 @@ function toggleHoldOrConvert(index) {
 
     
 function updateDiceDisplay() {
-    for (let i = 0; i < 3; i++) {
-        const el = document.getElementById("die" + i);
-        el.textContent = (dice[i] === null) ? "□" : diceSymbols[dice[i] - 1];
-        el.className = "die";
-        if (held[i]) el.classList.add("held");
-    }
+  const diceSymbols = ['⚀', '⚁', '⚂', '⚃', '⚄', '⚅'];
+  for (let i = 0; i < 3; i++) {
+    const el = document.getElementById(`die${i}`);
+    const value = dice[i];
+    el.textContent = value ? diceSymbols[value - 1] : '◻️';
+    el.className = "die";
+    if (held[i]) el.classList.add("held");
+    if (convertible[i] && value === 6) el.style.borderColor = "#f7b731";
+    else el.style.borderColor = "transparent";
+  }
 
-    // Anzeige im Würfeln-Button aktualisieren
-    const remaining = maxThrowsThisRound - throwCount;
-    const rollBtn = document.getElementById("rollBtn");
-    const allHeld = held.every(h => h);
+  // Würfel-Button Steuerung
+  const rollBtn = document.getElementById("rollBtn");
+  const remaining = maxThrowsThisRound - throwCount;
+  const allHeld = held.every(h => h);
 
-    if (remaining > 0) {
-        rollBtn.textContent = `Würfeln (${remaining})`;
-        rollBtn.disabled = false;
-    } else {
-        rollBtn.textContent = `Würfeln (${remaining})`;
-        rollBtn.disabled = true;
-    }
+  rollBtn.textContent = `Würfeln (${remaining})`;
+  rollBtn.disabled = !(remaining > 0 && !allHeld);
 
-    if (remaining > 0 && !allHeld) {
-      rollBtn.textContent = `Würfeln (${remaining})`;
-      rollBtn.disabled = false;
-    } else {
-      rrollBtn.textContent = `Würfeln (${remaining})`;
-      rollBtn.disabled = true;
-    } 
-    const endBtn = document.getElementById("endTurnBtn");
-      if (convertedThisTurn && throwCount === 0) {
-      endBtn.disabled = true;
-    } else {
-      endBtn.disabled = false;
-    }
-  
+  // Zug beenden Button Steuerung
+  const endBtn = document.getElementById("endTurnBtn");
+
+  // Sperre, wenn in dieser Runde eine Sechs gedreht wurde, aber noch kein Wurf kam
+  if (convertedThisTurn && throwCount === 0) {
+    endBtn.disabled = true;
+  } else {
+    endBtn.disabled = false;
+  }
+
+  // Wurfanzeige (optional)
+  document.getElementById("throwCount").textContent = `Wurf: ${throwCount}`;
 }
 
         function rateRoll(dice, throws, playerIndex) {
