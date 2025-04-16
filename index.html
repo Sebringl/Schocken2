@@ -496,16 +496,17 @@ function updateHistoryTable() {
       const entry = r[j];
       let labelClass = "";
 
-      if (entry) {
-        if (j === nextPlayerInRound && currentRound) {
-          labelClass = "highlight-current";
-        }
-        html += `<td class="${labelClass}">${entry.label}</td>`;
-        html += `<td class="${labelClass}" style="text-align:center;">${entry.throws}</td>`;
-      } else {
-        html += `<td></td><td></td>`;
-      }
-    }
+let labelClass = "";
+if (j === nextPlayerInRound && currentRound) {
+  labelClass = "highlight-current";
+}
+
+if (entry) {
+  html += `<td class="${labelClass}">${entry.label}</td>`;
+  html += `<td class="${labelClass}" style="text-align:center;">${entry.throws}</td>`;
+} else {
+  html += `<td class="${labelClass}"></td><td class="${labelClass}"></td>`;
+}
 
     html += "</tr>"; 
   }
