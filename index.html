@@ -244,20 +244,21 @@
         }
 
 function applyManualSixRule(dice) {
-  const sixIndexes = dice
-    .map((val, i) => ({ val, i }))
-    .filter(d => d.val === 6)
-    .map(d => d.i);
-
   convertible = [false, false, false];
 
-  if (sixIndexes.length < 2) return;
+  const sixPositions = [];
+  for (let i = 0; i < dice.length; i++) {
+    if (dice[i] === 6) {
+      sixPositions.push(i);
+    }
+  }
 
-  // Nur eine Sechs darf gedreht werden, wenn zwei geworfen wurden
-  const maxConvertible = sixIndexes.length === 2 ? 1 : 2;
+  if (sixPositions.length < 2) return;
 
-  for (let i = 0; i < maxConvertible; i++) {
-    convertible[sixIndexes[i]] = true;
+  const limit = sixPositions.length === 2 ? 1 : 2;
+
+  for (let i = 0; i < limit; i++) {
+    convertible[sixPositions[i]] = true;
   }
 }
 
