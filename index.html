@@ -64,12 +64,6 @@
     min-width: 60px;
   }
 
-  /*Highlight-Stile für die Tabelle */
-  .highlight-current {
-    background-color: #eeeeee !important;
-  }
-
-
 
   .removeBtn {
   font-size: 16px;
@@ -502,10 +496,6 @@ if (currentRound) {
     for (let j = 0; j < players.length; j++) {
       const entry = r[j];
       let labelClass = "";
-
-      if (j === nextPlayerInRound && currentRound) {
-        labelClass = "highlight-current";
-      }
 
       if (entry) {
         html += `<td class="${labelClass}">${entry.label}</td>`;
