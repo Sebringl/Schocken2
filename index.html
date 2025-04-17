@@ -324,8 +324,7 @@ function toggleHoldOrConvert(index) {
             manualRotationMode = true;
             document.getElementById("rotateBtn").disabled = false;
             throwCount = 0; 
-            playerTurnIndex = 0;
-            currentPlayer = startPlayerIndex;
+            playerTurnIndex = -1;
             scores = new Array(players.length).fill(null); dice = [null, null, null];
             held = [false, false, false]; convertible = [false, false, false];
             convertedThisTurn = false;
