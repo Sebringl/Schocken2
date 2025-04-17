@@ -185,7 +185,7 @@
       //document.getElementById("roundDisplay").textContent = "Runde: " + roundNumber;
       document.getElementById("setup").style.display = "none";
       document.getElementById("game").style.display = "block";
-      showPlayer(); updateDiceDisplay(); updateHistoryTable();
+      updateDiceDisplay(); updateHistoryTable(); nextPlayer();
     }
 
 function toggleHoldOrConvert(index) {
