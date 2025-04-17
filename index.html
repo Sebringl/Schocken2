@@ -185,7 +185,7 @@
       //document.getElementById("roundDisplay").textContent = "Runde: " + roundNumber;
       document.getElementById("setup").style.display = "none";
       document.getElementById("game").style.display = "block";
-      updateDiceDisplay(); updateHistoryTable(); ShowPlayer ()
+      showPlayer(); updateDiceDisplay(); updateHistoryTable();
     }
 
 function toggleHoldOrConvert(index) {
@@ -277,57 +277,54 @@ function toggleHoldOrConvert(index) {
         showPlayer();
         }
 
-function endTurn() {
-  scores[currentPlayer] = rateRoll(dice, throwCount, currentPlayer);
-  history[history.length - 1][currentPlayer] = scores[currentPlayer];
-  updateHistoryTable();
+        function endTurn() {
+            if (currentPlayer === 0 && throwCount > 0) maxThrowsThisRound = Math.min(3, throwCount);
+            const score = rateRoll(dice, throwCount, currentPlayer);
+            scores[currentPlayer] = score;
+            history[roundNumber - 1][currentPlayer] = {
+                label: score.label,
+                throws: score.throws
+            };
+            updateHistoryTable(); nextPlayer();
+        }
 
-  if (playerTurnIndex < players.length - 1) {
-    nextPlayer(); // ✅ nur wenn noch Spieler übrig sind
-  }
-  // ❌ KEIN weiterer nextPlayer(), denn der kommt über prepareNextRound()
-}
+    function nextPlayer() {
+      playerTurnIndex++;
 
-function nextPlayer() {
-  if (playerTurnIndex < players.length) {
-    if (playerTurnIndex === 0) {
-      currentPlayer = startPlayerIndex;
-    } else {
-      currentPlayer = (startPlayerIndex + playerTurnIndex) % players.length;
+      if (playerTurnIndex < players.length) {
+        // Bestimme nächsten Spieler im Uhrzeigersinn ab Startspieler
+        currentPlayer = (startPlayerIndex + playerTurnIndex) % players.length;
+
+        throwCount = 0;
+        dice = [null, null, null];
+        held = [false, false, false];
+        convertible = [false, false, false];
+        convertedThisTurn = false;
+        convertedCount = 0;
+
+        updateDiceDisplay();
+        showPlayer();
+      } else {
+        // Runde beenden
+        let list = scores.map((s, i) => ({ name: players[i], playerIndex: i, ...s }));
+
+        list.sort((a, b) => {
+          if (a.tier !== b.tier) return b.tier - a.tier;
+          if (a.subvalue !== b.subvalue) return b.subvalue - a.subvalue;
+          if (a.throws !== b.throws) return a.throws - b.throws;
+          return a.playerIndex - b.playerIndex;
+        });
+
+        wins[list[0].playerIndex]++;
+        localStorage.setItem("schockenWinner", list[0].name);
+
+        const loser = list[list.length - 1];
+        startPlayerIndex = loser.playerIndex;
+
+        prepareNextRound();
+        updateHistoryTable();
+      }
     }
-    playerTurnIndex++;
-
-    throwCount = 0;
-    dice = [null, null, null];
-    held = [false, false, false];
-    convertible = [false, false, false];
-    convertedThisTurn = false;
-    convertedCount = 0;
-
-    updateDiceDisplay();
-    showPlayer();
-  } else {
-    // Runde beenden
-    let list = scores.map((s, i) => ({ name: players[i], playerIndex: i, ...s }));
-
-    list.sort((a, b) => {
-      if (a.tier !== b.tier) return b.tier - a.tier;
-      if (a.subvalue !== b.subvalue) return b.subvalue - a.subvalue;
-      if (a.throws !== b.throws) return a.throws - b.throws;
-      return a.playerIndex - b.playerIndex;
-    });
-
-    wins[list[0].playerIndex]++;
-    localStorage.setItem("schockenWinner", list[0].name);
-
-    const loser = list[list.length - 1];
-    startPlayerIndex = loser.playerIndex;
-
-    prepareNextRound();
-    updateHistoryTable();
-    return;
-  }
-}
 
         function prepareNextRound() {
             manualRotationMode = true;
@@ -343,6 +340,7 @@ function nextPlayer() {
             //document.getElementById("throwCount").textContent = "Wurf: 0";
             maxThrowsThisRound = 3; history.push(new Array(players.length).fill(null)); roundNumber++;
             document.getElementById("roundDisplay").textContent = "Runde: " + roundNumber;
+            showPlayer(); updateDiceDisplay();   
         }
 
         function showPlayer() {
@@ -505,14 +503,9 @@ if (currentRound) {
       const entry = r[j];
       let labelClass = "";
 
-      const isCurrentRound = (i === history.length - 1);
-      const isNextPlayer = isCurrentRound && j === ((startPlayerIndex + playerTurnIndex) % players.length);
-
-
-
-      if (isNextPlayer) {
+      if (j === nextPlayerInRound && currentRound) {
         labelClass = "highlight-current";
-     }
+      }
 
       if (entry) {
         html += `<td class="${labelClass}">${entry.label}</td>`;
