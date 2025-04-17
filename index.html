@@ -408,10 +408,10 @@ function updateDiceDisplay() {
             tier = 2; subvalue = a;
         } else if (a - b === 1 && b - c === 1) {
             label = "Straße";
-            tier = 1; subvalue = a;
+            tier = 1; subvalue = 0;
         } else {
             label = `${a}-${b}-${c}`;
-            tier = 0; subvalue = a + b + c;
+            tier = 0; subvalue = parseInt(`${a}${b}${c}`);
         }
 
     return {
