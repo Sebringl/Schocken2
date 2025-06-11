@@ -266,6 +266,7 @@
       roundNumber++;
       document.getElementById("roundDisplay").textContent="Runde: "+roundNumber;
       showPlayer(); updateDiceDisplay();
+        playerTurnIndex = 0;                   // ← hier zurücksetzen
     }
     function rotatePlayer() {
       if(!manualRotationMode) return;
