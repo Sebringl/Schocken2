@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="de">
 <head>
@@ -85,10 +84,8 @@
     input[type="text"] { height: 34px; font-size: 16px; padding: 4px 10px; }
   </style>
 </head>
-
-
 <body>
- <!-- Setup-Bereich: Spieler hinzufügen und Spiel starten -->
+  <!-- Setup-Bereich: Spieler hinzufügen und Spiel starten -->
   <div id="setup">
     <div id="nameInputs"></div>
     <button onclick="addPlayer()">+ Spieler hinzufügen</button>
@@ -126,7 +123,6 @@
     <div id="historyTable" style="margin-top: 20px;"></div>
   </div>
 
-
   <script>
     /* ======== Globale Variablen ======== */
     const diceSymbols = ['⚀','⚁','⚂','⚃','⚄','⚅'];
@@ -134,7 +130,7 @@
     const playerBgColors = ['#ffe5e5','#e5ffe5','#e5e5ff','#fff5e5','#f5e5ff','#e5ffff','#ffe5f5','#f5ffe5','#fff0e5','#e5f5ff'];
 
     let players = [], scores = [], wins = [];
-    let currentPlayer = 0, startPlayerIndex = 0, playerTurnIndex = -1;
+    let currentPlayer = 0, startPlayerIndex = 0, playerTurnIndex = 0;
     let throwCount = 0, maxThrowsThisRound = 3;
     let dice = [null, null, null], held = [false, false, false], convertible = [false, false, false];
     let convertedThisTurn = false, convertedCount = 0, maxConvertibleThisTurn = 0;
@@ -142,34 +138,21 @@
     let roundNumber = 0, history = [];
 
     /* ======== Spieler-Setup: Nameingabe und Farbanpassung ======== */
-    /**
-     * Fügt ein neues Eingabefeld für einen Spielernamen hinzu.
-     * Jedes Feld wird in der definierten Spielerfarbe getextet.
-     */
     function addPlayer(name = "") {
       const index = document.querySelectorAll("#nameInputs .playerEntry").length;
       const container = document.getElementById("nameInputs");
       const div = document.createElement("div");
       div.className = "playerEntry";
       div.innerHTML = `
-        <input type="text" id="playerName${index}" 
-               value="${name || `Spieler ${index+1}`}" 
-               style="color:${playerTextColors[index] || '#000'};" />
+        <input type="text" id="playerName${index}" value="${name || `Spieler ${index+1}`}" style="color:${playerTextColors[index] || '#000'};" />
         <button class="removeBtn" onclick="removePlayer(this)">–</button>
       `;
       container.appendChild(div);
     }
-    /**
-     * Entfernt ein Spielernamenfeld und passt IDs + Farben an.
-     */
     function removePlayer(button) {
       button.parentElement.remove();
       rebuildPlayerInputLabels();
     }
-    /**
-     * Aktualisiert die ID und Textfarbe aller Spielernamenfelder
-     * nach dem Entfernen eines Feldes.
-     */
     function rebuildPlayerInputLabels() {
       document.querySelectorAll("#nameInputs .playerEntry").forEach((entry, i) => {
         const inp = entry.querySelector("input");
@@ -178,14 +161,9 @@
       });
     }
 
-    // Zwei Felder initial erzeugen
     addPlayer();
     addPlayer();
 
-    /**
-     * Startet das Spiel: Liest die Namen aus, speichert sie,
-     * initialisiert Scores, zeigt das Spiel-UI an und setzt den ersten Spieler.
-     */
     function startGame() {
       const savedNames = [];
       players = [];
@@ -206,371 +184,144 @@
       updateHistoryTable();
     }
 
-function toggleHoldOrConvert(index) {
-  if (dice[index] === null) return;
-
-  const remainingThrows = maxThrowsThisRound - throwCount;
-
-  // Fall 1: Du klickst auf eine 6, die konvertierbar ist
-  if (dice[index] === 6 && !held[index] && convertible[index]) {
-    if (remainingThrows <= 0) {
-      alert("In der letzten Wurfrunde dürfen keine Sechsen mehr getauscht werden.");
-      return;
+    /* ======== Würfel-Logik ======== */
+    function rollDie() { return Math.floor(Math.random()*6)+1; }
+    function applyManualSixRule(arr, heldArr) {
+      convertible = [false,false,false];
+      const fresh = arr.map((v,i)=>(v===6&&!heldArr[i])?i:null).filter(i=>i!==null);
+      if(fresh.length<2) { maxConvertibleThisTurn=0; return; }
+      maxConvertibleThisTurn = fresh.length===3?2:1;
+      fresh.forEach(i=>convertible[i]=true);
+    }
+    function toggleHoldOrConvert(i) {
+      if(dice[i]===null) return;
+      const rem = maxThrowsThisRound - throwCount;
+      if(dice[i]===6 && convertible[i] && !held[i]) {
+        if(rem<=0) { alert("In der letzten Wurfrunde dürfen keine Sechsen mehr getauscht werden."); return; }
+        if(convertedCount<maxConvertibleThisTurn) {
+          dice[i]=1; convertible[i]=false; convertedCount++; convertedThisTurn=true; updateDiceDisplay(); return;
+        } else {
+          held[i]=true; updateDiceDisplay(); return;
+        }
+      }
+      held[i]=!held[i]; updateDiceDisplay();
+    }
+    function rollDice() {
+      manualRotationMode=false;
+      document.getElementById("rotateBtn").disabled=true;
+      if(throwCount>=maxThrowsThisRound) return;
+      convertedThisTurn=false; convertedCount=0;
+      dice.forEach((v,i)=>{ if(!held[i]) dice[i]=rollDie(); });
+      throwCount++; applyManualSixRule(dice,held); updateDiceDisplay();
+      document.getElementById("endTurnBtn").disabled=false;
     }
 
-    const sixCount = dice.filter((d, i) => d === 6 && !held[i]).length;
-    const maxAllowed = sixCount === 3 ? 2 : 1;
-
-    if (convertedCount >= maxConvertibleThisTurn) {
-      // ❗ statt abbrechen → einfach normal halten!
-      held[index] = true;
-      updateDiceDisplay();
-      return;
+    /* ======== Bewertungs- und Zug-Logik ======== */
+    function rateRoll(d, t, idx) {
+      const s=[...d].sort((a,b)=>b-a), [a,b2,c]=s;
+      let label, tier, sub;
+      const ones = s.filter(v=>v===1).length;
+      if(ones===3) { label="Schock Out"; tier=4; sub=6; }
+      else if(ones===2) { label=`Schock ${a}`; tier=3; sub=a; }
+      else if(a===b2 && b2===c) { label="Pasch"; tier=2; sub=a; }
+      else if(a-b2===1 && b2-c===1) { label="Straße"; tier=1; sub=0; }
+      else { label=`${a}-${b2}-${c}`; tier=0; sub=parseInt(`${a}${b2}${c}`); }
+      return { label, value: tier*1000+sub, tier, subvalue:sub, throws:t, playerIndex:idx };
     }
-
-    // Drehung durchführen
-    dice[index] = 1;
-    convertible[index] = false;
-    convertedCount++;
-    convertedThisTurn = true;
-    updateDiceDisplay();
-    return;
-  }
-
-  // Fall 2: Sechs ist nicht drehbar – aber kann gehalten werden
-  if (dice[index] === 6 && !convertible[index]) {
-    held[index] = !held[index];
-    updateDiceDisplay();
-    return;
-  }
-
-  // Alle anderen normalen Fälle
-  held[index] = !held[index];
-  updateDiceDisplay();
-}
-  
-
-        function rollDie() { return Math.floor(Math.random() * 6) + 1; }
-
-        function rollDice() {
-            manualRotationMode = false;
-            document.getElementById("rotateBtn").disabled = true;
-            convertedThisTurn = false;
-            convertedCount = 0;
-            if (throwCount >= maxThrowsThisRound) { document.getElementById("rollBtn").disabled = true; return; }
-            let rolled = [];
-            for (let i = 0; i < 3; i++) if (!held[i]) { dice[i] = rollDie(); rolled.push(i); }
-            throwCount++; applyManualSixRule(dice, held);  updateDiceDisplay(); 
-            //document.getElementById("throwCount").textContent = `Wurf: ${throwCount}`;
-            document.getElementById("endTurnBtn").disabled = false;
-            
-            if (throwCount >= maxThrowsThisRound) { document.getElementById("rollBtn").disabled = true; }
-        }
-
-    function applyManualSixRule(dice, held) {
-  convertible = [false, false, false];
-  // Prüfe: Welche Sechsen wurden frisch geworfen (nicht gehalten)?
-  const freshSixes = [];
-  for (let i = 0; i < dice.length; i++) {
-    if (dice[i] === 6 && !held[i]) {
-      freshSixes.push(i);
+    function endTurn() {
+      scores[currentPlayer]=rateRoll(dice,throwCount,currentPlayer);
+      history[roundNumber-1][currentPlayer]=scores[currentPlayer];
+      updateHistoryTable();
+      nextPlayer();
     }
-  }
-  // Nur wenn mindestens 2 frische Sechsen: irgendwas drehbar
-  if (freshSixes.length < 2) {
-    maxConvertibleThisTurn = 0;
-    return;
-  }
-
-  maxConvertibleThisTurn = freshSixes.length === 3 ? 2 : 1;
-// Jetzt: Alle frisch geworfenen Sechsen als potenziell drehbar markieren
-  for (let i of freshSixes) {
-    convertible[i] = true;
-  }
-}
-
-        function rotatePlayer() {
-          if (!manualRotationMode) return;
-          currentPlayer = (currentPlayer + 1) % players.length;
-        showPlayer();
-        }
-
-        function endTurn() {
-            if (currentPlayer === 0 && throwCount > 0) maxThrowsThisRound = Math.min(3, throwCount);
-            const score = rateRoll(dice, throwCount, currentPlayer);
-            scores[currentPlayer] = score;
-            history[roundNumber - 1][currentPlayer] = {
-                label: score.label,
-                throws: score.throws
-            };
-            updateHistoryTable(); nextPlayer();
-        }
-
     function nextPlayer() {
       playerTurnIndex++;
-
-      if (playerTurnIndex < players.length) {
-        // Bestimme nächsten Spieler im Uhrzeigersinn ab Startspieler
-        currentPlayer = (startPlayerIndex + playerTurnIndex) % players.length;
-
-        throwCount = 0;
-        dice = [null, null, null];
-        held = [false, false, false];
-        convertible = [false, false, false];
-        convertedThisTurn = false;
-        convertedCount = 0;
-
-        updateDiceDisplay();
-        showPlayer();
+      if(playerTurnIndex<players.length) {
+        currentPlayer=(startPlayerIndex+playerTurnIndex)%players.length;
+        resetTurnState();
+        showPlayer(); updateDiceDisplay();
       } else {
-        // Runde beenden
-        let list = scores.map((s, i) => ({ name: players[i], playerIndex: i, ...s }));
-
-        list.sort((a, b) => {
-          if (a.tier !== b.tier) return b.tier - a.tier;
-          if (a.subvalue !== b.subvalue) return b.subvalue - a.subvalue;
-          if (a.throws !== b.throws) return a.throws - b.throws;
-          return a.playerIndex - b.playerIndex;
-        });
-
-        wins[list[0].playerIndex]++;
-        localStorage.setItem("schockenWinner", list[0].name);
-
-        const loser = list[list.length - 1];
-        startPlayerIndex = loser.playerIndex;
-
-        prepareNextRound();
-        updateHistoryTable();
+        const list=scores.map((s,i)=>({name:players[i],idx:i,...s}));
+        list.sort((a,b)=>b.value-a.value||a.throws-b.throws||a.idx-b.idx);
+        wins[list[0].idx]++;
+        startPlayerIndex=list[list.length-1].idx;
+        prepareNextRound(); updateHistoryTable();
       }
     }
-
-function prepareNextRound() {
-  // nächster Startspieler = Verlierer der letzten Runde
-  currentPlayer = startPlayerIndex;
-  
-  // manuelles Drehen ausschalten (🔄-Button deaktivieren)
-  manualRotationMode = false;
-  document.getElementById("rotateBtn").disabled = true;
-
-  // Reset für den neuen Spielzug
-  throwCount = 0;
-  playerTurnIndex = 0;
-  scores = new Array(players.length).fill(null);
-  dice = [null, null, null];
-  held = [false, false, false];
-  convertible = [false, false, false];
-  convertedThisTurn = false;
-  convertedCount = 0;
-
-  // Ergebnisfeld zurücksetzen
-  document.getElementById("result").textContent = "";
-
-  // Wurfbegrenzung zurücksetzen
-  maxThrowsThisRound = 3;
-
-  // Neue Runde ins History-Array
-  history.push(new Array(players.length).fill(null));
-  
-  // Rundenzähler erhöhen und anzeigen
-  roundNumber++;
-  document.getElementById("roundDisplay").textContent = "Runde: " + roundNumber;
-
-  // Anzeige aktualisieren
-  showPlayer();
-  updateDiceDisplay();
-}
-
-
-        function showPlayer() {
-            document.getElementById("playerDisplay").textContent = `Am Zug: ${players[currentPlayer]}`;
-            document.getElementById("result").textContent = "";
-            //document.getElementById("throwCount").textContent = "Wurf: 0";
-            document.getElementById("rollBtn").disabled = false;
-            document.getElementById("endTurnBtn").disabled = true;
-            document.getElementById("rollBtn").textContent = `Würfeln (${maxThrowsThisRound})`;
-        }
-
-    
-function updateDiceDisplay() {
-  const diceSymbols = ['⚀', '⚁', '⚂', '⚃', '⚄', '⚅'];
-  for (let i = 0; i < 3; i++) {
-    const el = document.getElementById(`die${i}`);
-    const value = dice[i];
-    el.textContent = value ? diceSymbols[value - 1] : '□';
-    el.className = "die";
-    if (held[i]) el.classList.add("held");
-    el.style.borderColor = "transparent";
-  }
-
-  // Würfel-Button Steuerung
-  const rollBtn = document.getElementById("rollBtn");
-  const remaining = maxThrowsThisRound - throwCount;
-  const allHeld = held.every(h => h);
-
-  rollBtn.textContent = `Würfeln (${remaining})`;
-  rollBtn.disabled = !(remaining > 0 && !allHeld);
-
-  // Zug beenden Button Steuerung
-  const endBtn = document.getElementById("endTurnBtn");
-
-  // Sperre, wenn in dieser Runde eine Sechs gedreht wurde, aber noch kein Wurf kam
-  if (convertedThisTurn && throwCount === 0) {
-    endBtn.disabled = true;
-  } else {
-    endBtn.disabled = false;
-  }
-
-  // Wurfanzeige (optional)
-  document.getElementById("throwCount").textContent = `Wurf: ${throwCount}`;
-}
-
-        function rateRoll(dice, throws, playerIndex) {
-            dice = dice.slice().sort((x, y) => y - x);
-            const [a, b, c] = dice;
-            let label, tier, subvalue;
-
-            if (dice.includes(null)) {
-                return {
-                    label: "Ungültiger Wurf",
-                    value: 0,
-                    tier: -1,
-                    subvalue: 0,
-                    throws,
-                    playerIndex
-                };
-           }
-
-        const countOf1 = dice.filter(d => d === 1).length;
-                
-        if (countOf1 === 3) {
-            label = "Schock Out";
-            tier = 4; subvalue = 6;
-        } else if (countOf1 === 2)  {
-            label = `Schock ${a}`;
-            tier = 3; subvalue = a;
-        } else if (a === b && b === c) {
-            label = "Pasch";
-            tier = 2; subvalue = a;
-        } else if (a - b === 1 && b - c === 1) {
-            label = "Straße";
-            tier = 1; subvalue = 0;
-        } else {
-            label = `${a}-${b}-${c}`;
-            tier = 0; subvalue = parseInt(`${a}${b}${c}`);
-        }
-
-    return {
-        label,
-        value: tier * 1000 + subvalue,
-        tier,
-        subvalue,
-        throws,
-        playerIndex
-    };
-}
-
-function getRoundBestPlayerIndex(round) {
-  const entries = round
-    .map((entry, i) => ({ ...entry, index: i }))
-    .filter(e => e.label && typeof e.tier !== 'undefined');
-
-  if (!entries.length) return null;
-
-  entries.sort((a, b) => {
-    if (a.tier !== b.tier) return b.tier - a.tier;
-    if (a.subvalue !== b.subvalue) return b.subvalue - a.subvalue;
-    if (a.throws !== b.throws) return a.throws - b.throws;
-    return a.index - b.index;
-  });
-
-  return entries[0].index;
-}
-
-function getRoundWinner(round) {
-  return getRoundBestPlayerIndex(round); // für fertige Runden verwenden wir dieselbe Logik
-}
-
-    
-
-function updateHistoryTable() {
-  if (!history.length) return;
-
-  let html = "<h3></h3><table border='1' style='margin:auto; border-collapse:collapse;'>";
-
-  // Kopfzeile mit Spielernamen + Siegen
-  html += "<tr><th rowspan='2'>Runde</th>";
-  players.forEach((name, i) => {
-    const winCount = wins[i];
-    const displayName = winCount > 0 ? `${name} (${winCount} 👑)` : name;
-    html += `<th colspan="2">${displayName}</th>`;
-  });
-  html += "</tr>";
-
-  // Unter-Kopfzeile
-  html += "<tr>";
-  players.forEach(() => {
-    html += "<th>🎲</th><th>🔁</th>";
-  });
-  html += "</tr>";
-
-  // Rundenverlauf (neueste Runde zuerst)
-  for (let i = history.length - 1; i >= 0; i--) {
-    const r = history[i];
-    html += `<tr><td>${i + 1}</td>`;
-
-    const currentRound = (i === history.length - 1);
-
-    // Finde nächsten Spieler, der noch keinen Eintrag hat
-let nextPlayerInRound = null;
-if (currentRound) {
-  const allEmpty = r.every(e => !e);
-  if (allEmpty) {
-    nextPlayerInRound = currentPlayer;
-  } else {
-    for (let p = 0; p < players.length; p++) {
-      if (!r[p]) {
-        nextPlayerInRound = p;
-        break;
-      }
-    }
-  }
-}
-
-    // Schleife durch alle Spieler
-    for (let j = 0; j < players.length; j++) {
-      const entry = r[j];
-      let labelClass = "";
-
-      if (entry) {
-        html += `<td class="${labelClass}">${entry.label}</td>`;
-        html += `<td class="${labelClass}" style="text-align:center;">${entry.throws}</td>`;
-      } else {
-        html += `<td class="${labelClass}"></td><td class="${labelClass}"></td>`;
-      }
+    function resetTurnState() {
+      throwCount=0;
+      dice=[null,null,null]; held=[false,false,false]; convertible=[false,false,false];
+      convertedThisTurn=false; convertedCount=0;
     }
 
-    html += "</tr>";
-  }
+    /* ======== Vorbereitung nächste Runde ======== */
+    function prepareNextRound() {
+      currentPlayer=startPlayerIndex;
+      manualRotationMode=false;
+      document.getElementById("rotateBtn").disabled=true;
+      resetTurnState();
+      document.getElementById("result").textContent="";
+      maxThrowsThisRound=3;
+      history.push(new Array(players.length).fill(null));
+      roundNumber++;
+      document.getElementById("roundDisplay").textContent="Runde: "+roundNumber;
+      showPlayer(); updateDiceDisplay();
+    }
+    function rotatePlayer() {
+      if(!manualRotationMode) return;
+      currentPlayer=(currentPlayer+1)%players.length;
+      showPlayer();
+    }
 
-  html += "</table>";
-  document.getElementById("historyTable").innerHTML = html;
-}
+    /* ======== Anzeige-Funktionen ======== */
+    function showPlayer() {
+      document.getElementById("playerDisplay").textContent=`Am Zug: ${players[currentPlayer]}`;
+      document.body.style.backgroundColor=playerBgColors[currentPlayer]||'#fff';
+      document.getElementById("rollBtn").disabled=false;
+      document.getElementById("endTurnBtn").disabled=true;
+      document.getElementById("rollBtn").textContent=`Würfeln (${maxThrowsThisRound-throwCount})`;
+    }
+    function updateDiceDisplay() {
+      dice.forEach((v,i)=>{
+        const el=document.getElementById(`die${i}`);
+        el.textContent=v?diceSymbols[v-1]:'□';
+        el.className='die'; if(held[i]) el.classList.add('held');
+      });
+      const rem=maxThrowsThisRound-throwCount;
+      document.getElementById("rollBtn").textContent=`Würfeln (${rem})`;
+      document.getElementById("rollBtn").disabled=!(rem>0 && !held.every(h=>h));
+      const endBtn=document.getElementById("endTurnBtn");
+      endBtn.disabled=convertedThisTurn && throwCount===0;
+      document.getElementById("throwCount").textContent=`Wurf: ${throwCount}`;
+    }
 
+    /* ======== History- und Tabellen-Logik ======== */
+    function updateHistoryTable() {
+      if(!history.length) return;
+      let html="<table border='1' style='margin:auto;border-collapse:collapse;'>";
+      html+="<tr><th rowspan='2'>Runde</th>";
+      players.forEach((n,i)=>{
+        const wc=wins[i]?` (${wins[i]} 👑)`:'';
+        html+=`<th colspan='2' style='color:${playerTextColors[i]||'#000'}'>${n}${wc}</th>`;
+      });
+      html+="</tr><tr>"+players.map(()=>"<th>🎲</th><th>🔁</th>").join('')+"</tr>";
+      for(let i=history.length-1;i>=0;i--){
+        const r=history[i]; html+=`<tr><td>${i+1}</td>`;
+        r.forEach(e=>{ html+=`<td>${e?e.label:''}</td><td>${e?e.throws:''}</td>`; });
+        html+="</tr>";
+      }
+      html+="</table>";
+      document.getElementById("historyTable").innerHTML=html;
+    }
 
-function resetGame() {
-    const winner = document.querySelector("#leaderboard ol li");
-    const winnerName = winner ? winner.textContent.split(':')[0] : null;
-    const savedNames = JSON.parse(localStorage.getItem("schockenPlayers") || "[]");
-
-    document.getElementById("nameInputs").innerHTML = "";
-    savedNames.forEach(name => addPlayer(name));
-
-    document.getElementById("setup").style.display = "block";
-    document.getElementById("game").style.display = "none";
-
-    roundNumber = 0;
-    history = [];
-}
-    </script>
+    function resetGame() {
+      const saved=JSON.parse(localStorage.getItem("schockenPlayers")||"[]");
+      document.getElementById("nameInputs").innerHTML='';
+      saved.forEach(n=>addPlayer(n));
+      document.getElementById("setup").style.display='block';
+      document.getElementById("game").style.display='none';
+      roundNumber=0; history=[];
+    }
+  </script>
 </body>
 </html>
