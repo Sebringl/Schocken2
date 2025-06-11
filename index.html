@@ -139,7 +139,7 @@
     '#e5ffff','#ffe5f5','#f5ffe5','#fff0e5','#e5f5ff'
    ];
 
-    function addPlayer(name = "") {
+  function addPlayer(name = "") {
       const index = document.querySelectorAll("#nameInputs .playerEntry").length;
       const container = document.getElementById("nameInputs");
 
@@ -560,7 +560,7 @@ function resetGame() {
     const winner = document.querySelector("#leaderboard ol li");
     const winnerName = winner ? winner.textContent.split(':')[0] : null;
     const savedNames = JSON.parse(localStorage.getItem("schockenPlayers") || "[]");
-
+    document.body.style.backgroundColor = '#f0f0f0';
     document.getElementById("nameInputs").innerHTML = "";
     savedNames.forEach(name => addPlayer(name));
 
