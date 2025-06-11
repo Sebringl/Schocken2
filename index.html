@@ -12,6 +12,9 @@
     .held { border-color: green; background-color: #eaffea; }
     button { padding: 12px 24px; font-size: 18px; margin: 10px; }
     input { font-size: 18px; padding: 5px 10px; margin: 5px; }
+    <label style="font-size:18px; margin-bottom:10px; display:block;">
+    <input type="checkbox" id="deckelToggle" /> Mit Deckeln spielen
+    </label>
     #result, #throwCount, #playerDisplay { font-size: 20px; margin-top: 10px; transition: color 0.2s ease;}
     #leaderboard { text-align: left; margin-top: 20px; }
     #historyTable table {
@@ -129,6 +132,11 @@
     let convertedCount = 0;
     let manualRotationMode = true;
     let maxConvertibleThisTurn = 0;
+    let useDeckel = false;
+    let deckelCount = [];
+    let halfLossCount = [];
+    let inFinal = false;
+    let finalPlayers = [];
 
   const playerTextColors = [
     '#e6194b','#3cb44b','#4363d8','#f58231','#911eb4',
@@ -178,6 +186,22 @@
       throwCount = 0;
       convertedThisTurn = false;
       convertedCount = 0;
+//check, ob mit Deckel
+      useDeckel = document.getElementById("deckelToggle").checked;
+    // dann:
+      deckelCount = new Array(players.length).fill(0);
+    halfLossCount = new Array(players.length).fill(0);
+    inFinal = false;
+    finalPlayers = [];
+    // Und falls useDeckel: Auswürfeln abschalten
+    if (useDeckel) {
+      manualRotationMode = false;
+      document.getElementById("rotateBtn").disabled = true;
+      startPlayerIndex = 0;
+  currentPlayer = 0;
+    }
+
+      
       players = [], roundNumber = 1, history = [[]];
       const nameInputs = document.querySelectorAll("#nameInputs input");
       for (let i = 0; i < nameInputs.length; i++) {
@@ -297,6 +321,51 @@ function toggleHoldOrConvert(index) {
 
     function nextPlayer() {
       playerTurnIndex++;
+//Deckel-Modus
+    if (useDeckel) {
+  // 1. Verlierer bestimmen
+  const loser = list[list.length - 1].playerIndex;
+  // 2. Anzahl Deckel berechnen
+  let penalty;
+  switch (list[0].tier) {
+    case 0: penalty = 1; break;          // einfacher Wurf
+    case 1: penalty = 2; break;          // Straße
+    case 2: penalty = 3; break;          // Pasch
+    case 3: penalty = list[0].subvalue; break; // Schock X
+    case 4: penalty = 13; break;         // Schock Out
+  }
+  deckelCount[loser] += penalty;
+  // 3. Historie speichern
+  history[roundNumber-1][loser] = {
+    label: list[0].label,
+    deckels: deckelCount[loser]
+  };
+  // 4. Halbzeit-Check
+  if (deckelCount[loser] >= 13) {
+    halfLossCount[loser]++;
+    if (halfLossCount.filter(c => c>0).length < 2) {
+      alert(`Halbzeit verloren von ${players[loser]}`);
+      // Neustart der Deckel für neue Hälfte
+      deckelCount.fill(0);
+      history = [];
+      roundNumber = 1;
+    } else {
+      // Finale starten: nur Verlierer spielen weiter
+      finalPlayers = players.filter((_,i) => halfLossCount[i]>0);
+      alert(`Finale zwischen ${finalPlayers.join(" und ")}`);
+      players = finalPlayers;
+      deckelCount = new Array(players.length).fill(0);
+      history = [];
+      roundNumber = 1;
+      inFinal = true;
+    }
+  }
+  updateHistoryTable();
+  return; // keine prepareNextRound(), wir regeln intern
+}
+// … dein alter Code für Normalmodus …
+
+      
 
       if (playerTurnIndex < players.length) {
         // Bestimme nächsten Spieler im Uhrzeigersinn ab Startspieler
@@ -490,26 +559,28 @@ function updateHistoryTable() {
 
   let html = "<h3></h3><table border='1' style='margin:auto; border-collapse:collapse;'>";
 
-  // Kopfzeile mit Spielernamen + Siegen
+  // Kopfzeile mit Spielernamen + Siegen bzw. Deckeln
   html += "<tr><th rowspan='2'>Runde</th>";
   players.forEach((name, i) => {
-    const winCount = wins[i];
-    const displayName = winCount > 0 ? `${name} (${winCount} 👑)` : name;
+    let displayName;
+    if (useDeckel) {
+      displayName = `${name} (${deckelCount[i]})`;
+    } else {
+      const winCount = wins[i];
+      displayName = winCount > 0 ? `${name} (${winCount} 👑)` : name;
+    }
     html += `
-    <th colspan="2"
-      style="
-        color: ${playerTextColors[i]};
-        //background-color: ${playerBgColors[i]};
-      ">
-    ${displayName}
-  </th>`;
+    <th colspan=\"2\"
+      style=\"color: ${playerTextColors[i]};\">
+      ${displayName}
+    </th>`;
   });
   html += "</tr>";
 
-  // Unter-Kopfzeile
-  html += "<tr>";
+  // Unter-Kopfzeile mit Icons (Würfel + Wurfanzahl oder Deckel)
+  html += "<tr><th></th>";
   players.forEach(() => {
-    html += "<th>🎲</th><th>🔁</th>";
+    html += `<th>🎲</th><th>${useDeckel ? 'Deckel' : '🔁'}</th>`;
   });
   html += "</tr>";
 
@@ -519,22 +590,39 @@ function updateHistoryTable() {
     html += `<tr><td>${i + 1}</td>`;
 
     const currentRound = (i === history.length - 1);
-
-    // Finde nächsten Spieler, der noch keinen Eintrag hat
-let nextPlayerInRound = null;
-if (currentRound) {
-  const allEmpty = r.every(e => !e);
-  if (allEmpty) {
-    nextPlayerInRound = currentPlayer;
-  } else {
-    for (let p = 0; p < players.length; p++) {
-      if (!r[p]) {
-        nextPlayerInRound = p;
-        break;
+    // Ermittle nächsten Spieler im aktuellen Zug
+    let nextPlayerInRound = null;
+    if (currentRound) {
+      const allEmpty = r.every(e => !e);
+      if (allEmpty) {
+        nextPlayerInRound = currentPlayer;
+      } else {
+        for (let p = 0; p < players.length; p++) {
+          if (!r[p]) { nextPlayerInRound = p; break; }
+        }
       }
     }
+
+    // Per Spieler Zellen füllen
+    players.forEach((_, p) => {
+      const entry = r[p];
+      if (entry) {
+        html += `<td>${entry.label}</td>`;
+        html += `<td>${useDeckel ? entry.deckels : entry.throws}</td>`;
+      } else if (currentRound && p === nextPlayerInRound) {
+        html += `<td colspan=\"2\" class=\"next\">…</td>`;
+      } else {
+        html += `<td>-</td><td>-</td>`;
+      }
+    });
+
+    html += "</tr>";
   }
+
+  html += "</table>";
+  document.getElementById("historyTable").innerHTML = html;
 }
+
 
     // Schleife durch alle Spieler
     for (let j = 0; j < players.length; j++) {
