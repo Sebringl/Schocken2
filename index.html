@@ -4,89 +4,91 @@
 <head>
   <meta charset="UTF-8">
   <title>Klausberg-Schocken</title>
+  <!--
+    Grundlegende Styles für Schriftarten, Layout, Würfelanzeige und sanfte Hintergrund-Transitions
+  -->
   <style>
     html { font-size: 20px; }
-    body { font-family: Arial, sans-serif; text-align: center; padding: 30px; max-width: 700px; margin: auto; }
+    body {
+      font-family: Arial, sans-serif;
+      text-align: center;
+      padding: 30px;
+      max-width: 700px;
+      margin: auto;
+      transition: background-color 0.4s ease;
+    }
+
+    /* Container für die drei Würfel */
     .dice-container { display: flex; justify-content: center; gap: 20px; margin: 20px 0; }
-    .die { font-size: 130px; cursor: pointer; padding: 15px; border: 2px solid transparent; border-radius: 10px; }
+    .die {
+      font-size: 130px;
+      cursor: pointer;
+      padding: 15px;
+      border: 2px solid transparent;
+      border-radius: 10px;
+    }
     .held { border-color: green; background-color: #eaffea; }
+
     button { padding: 12px 24px; font-size: 18px; margin: 10px; }
     input { font-size: 18px; padding: 5px 10px; margin: 5px; }
+
     #result, #throwCount, #playerDisplay { font-size: 20px; margin-top: 10px; }
     #leaderboard { text-align: left; margin-top: 20px; }
+
+    /* Tabelle für Spielhistorie */
     #historyTable table {
       border-collapse: collapse;
       margin: auto;
       width: 100%;
       font-size: 0.9rem;
     }
-
-#rotateBtn {
-  background: none;
-  border: none;
-  font-size: 0.9em;         /* kleinere Schriftgröße */
-  cursor: pointer;
-  padding: 0;
-  margin-left: 6px;
-  vertical-align: middle;
-  line-height: 1;
-  height: 1em;
-  width: 1em;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-}
-
-#rotateBtn:disabled {
-  opacity: 0.3;
-  cursor: default;
-}
-#rotateBtn:hover:not(:disabled) {
-  transform: scale(1.1);
-}
-
-  #historyTable th, #historyTable td {
+    #historyTable th, #historyTable td {
       border: 1px solid #ccc;
       padding: 4px 8px;
       text-align: center;
-  }
+    }
+    #historyTable th { background-color: #e0e0e0; font-weight: bold; }
+    #historyTable tr:nth-child(even) { background-color: #f9f9f9; }
+    #historyTable td { min-width: 60px; }
 
-  #historyTable th {
-    background-color: #e0e0e0;
-    font-weight: bold;
-  }
-    
-  #historyTable tr:nth-child(even) {
-    background-color: #f9f9f9;
-  }
+    /* Knopf zum manuellen nächsten Spieler */
+    #rotateBtn {
+      background: none;
+      border: none;
+      font-size: 0.9em;
+      cursor: pointer;
+      padding: 0;
+      margin-left: 6px;
+      vertical-align: middle;
+      line-height: 1;
+      height: 1em;
+      width: 1em;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+    }
+    #rotateBtn:disabled { opacity: 0.3; cursor: default; }
+    #rotateBtn:hover:not(:disabled) { transform: scale(1.1); }
 
-  #historyTable td {
-    min-width: 60px;
-  }
-
-
-  .removeBtn {
-  font-size: 16px;
-  padding: 4px 10px;
-  height: 34px;
-  line-height: 1;
-  vertical-align: middle;
-  margin-left: 6px;
-  /* background: none; */
-  border: 1px solid #ccc;
-  border-radius: 4px;
-  cursor: pointer;
-  }
-
-  input[type="text"] {
-  height: 34px;
-  font-size: 16px;
-  padding: 4px 10px;
-  }
-    
+    /* Entfernen-Button für Spielernamenfelder */
+    .removeBtn {
+      font-size: 16px;
+      padding: 4px 10px;
+      height: 34px;
+      line-height: 1;
+      vertical-align: middle;
+      margin-left: 6px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+    input[type="text"] { height: 34px; font-size: 16px; padding: 4px 10px; }
   </style>
 </head>
+
+
 <body>
+ <!-- Setup-Bereich: Spieler hinzufügen und Spiel starten -->
   <div id="setup">
     <div id="nameInputs"></div>
     <button onclick="addPlayer()">+ Spieler hinzufügen</button>
@@ -94,21 +96,29 @@
     <button onclick="startGame()">Spiel starten</button>
   </div>
 
+  <!-- Spielbereich: Nur nach Start sichtbar -->
   <div id="game" style="display:none;">
+    <!-- Anzeige des aktuellen Spielers und manueller Wechsel -->
     <div id="playerControl" style="margin-top: 20px;">
       <h1 id="playerDisplay" style="font-size: 24px; margin-bottom: 0;">Am Zug: Spieler 1</h1>
       <div style="text-align: center; margin-top: 5px;">
-      <button id="rotateBtn" onclick="rotatePlayer()" title="Nächster Spieler">🔄</button>
+        <button id="rotateBtn" onclick="rotatePlayer()" title="Nächster Spieler">🔄</button>
+      </div>
     </div>
-    </div>
+
+    <!-- Würfelanzeige und -interaktion -->
     <div class="dice-container">
       <div class="die" id="die0" onclick="toggleHoldOrConvert(0)">⚀</div>
       <div class="die" id="die1" onclick="toggleHoldOrConvert(1)">⚀</div>
       <div class="die" id="die2" onclick="toggleHoldOrConvert(2)">⚀</div>
     </div>
+
+    <!-- Steuerknöpfe -->
     <button onclick="rollDice()" id="rollBtn">Würfeln</button>
     <button onclick="endTurn()" id="endTurnBtn" disabled>Zug beenden</button>
     <button onclick="resetGame()">Neues Spiel</button>
+
+    <!-- Statusanzeigen -->
     <div id="throwCount">Wurf: 0</div>
     <div id="roundDisplay" style="margin-top:10px; font-weight:bold;"></div>
     <div id="result"></div>
@@ -116,70 +126,84 @@
     <div id="historyTable" style="margin-top: 20px;"></div>
   </div>
 
-  <script>
-    let players = [], scores = [], currentPlayer = 0, maxThrowsThisRound = 3;
-    let throwCount = 0, dice = [null, null, null], held = [false, false, false], convertible = [false, false, false];
-    let diceSymbols = ['⚀', '⚁', '⚂', '⚃', '⚄', '⚅'], roundNumber = 0, history = [];
-    let wins = [];
-    let startPlayerIndex = 0, playerTurnIndex = 0;
-    let convertedThisTurn = false;
-    let convertedCount = 0;
-    let manualRotationMode = true;
-    let maxConvertibleThisTurn = 0;
 
+  <script>
+    /* ======== Globale Variablen ======== */
+    const diceSymbols = ['⚀','⚁','⚂','⚃','⚄','⚅'];
+    const playerTextColors = ['#e6194b','#3cb44b','#4363d8','#f58231','#911eb4','#46f0f0','#f032e6','#bcf60c','#fabebe','#008080'];
+    const playerBgColors = ['#ffe5e5','#e5ffe5','#e5e5ff','#fff5e5','#f5e5ff','#e5ffff','#ffe5f5','#f5ffe5','#fff0e5','#e5f5ff'];
+
+    let players = [], scores = [], wins = [];
+    let currentPlayer = 0, startPlayerIndex = 0, playerTurnIndex = -1;
+    let throwCount = 0, maxThrowsThisRound = 3;
+    let dice = [null, null, null], held = [false, false, false], convertible = [false, false, false];
+    let convertedThisTurn = false, convertedCount = 0, maxConvertibleThisTurn = 0;
+    let manualRotationMode = true;
+    let roundNumber = 0, history = [];
+
+    /* ======== Spieler-Setup: Nameingabe und Farbanpassung ======== */
+    /**
+     * Fügt ein neues Eingabefeld für einen Spielernamen hinzu.
+     * Jedes Feld wird in der definierten Spielerfarbe getextet.
+     */
     function addPlayer(name = "") {
       const index = document.querySelectorAll("#nameInputs .playerEntry").length;
       const container = document.getElementById("nameInputs");
-
       const div = document.createElement("div");
       div.className = "playerEntry";
       div.innerHTML = `
-        <input type="text" id="playerName${index}" value="${name || `Spieler ${index + 1}`}" />
+        <input type="text" id="playerName${index}" 
+               value="${name || `Spieler ${index+1}`}" 
+               style="color:${playerTextColors[index] || '#000'};" />
         <button class="removeBtn" onclick="removePlayer(this)">–</button>
       `;
-
       container.appendChild(div);
     }
-
-  addPlayer();
-  addPlayer();
-    
+    /**
+     * Entfernt ein Spielernamenfeld und passt IDs + Farben an.
+     */
     function removePlayer(button) {
-      const entry = button.parentElement;
-      entry.remove();
+      button.parentElement.remove();
       rebuildPlayerInputLabels();
     }
-
+    /**
+     * Aktualisiert die ID und Textfarbe aller Spielernamenfelder
+     * nach dem Entfernen eines Feldes.
+     */
     function rebuildPlayerInputLabels() {
-      const entries = document.querySelectorAll("#nameInputs .playerEntry");
-      entries.forEach((entry, i) => {
-        const input = entry.querySelector("input");
-        input.id = `playerName${i}`;
-        //entry.firstChild.textContent = `Spieler ${i + 1}: `;
+      document.querySelectorAll("#nameInputs .playerEntry").forEach((entry, i) => {
+        const inp = entry.querySelector("input");
+        inp.id = `playerName${i}`;
+        inp.style.color = playerTextColors[i] || '#000';
       });
     }
 
+    // Zwei Felder initial erzeugen
+    addPlayer();
+    addPlayer();
+
+    /**
+     * Startet das Spiel: Liest die Namen aus, speichert sie,
+     * initialisiert Scores, zeigt das Spiel-UI an und setzt den ersten Spieler.
+     */
     function startGame() {
       const savedNames = [];
-      maxThrowsThisRound = 3;
-      throwCount = 0;
-      convertedThisTurn = false;
-      convertedCount = 0;
-      players = [], roundNumber = 1, history = [[]];
-      const nameInputs = document.querySelectorAll("#nameInputs input");
-      for (let i = 0; i < nameInputs.length; i++) {
-        const name = nameInputs[i].value || `Spieler ${i + 1}`;
-        players.push(name);
-        savedNames[i] = name;
-      }
+      players = [];
+      roundNumber = 1;
+      history = [[]];
+      document.querySelectorAll("#nameInputs input").forEach((inp, i) => {
+        players.push(inp.value || `Spieler ${i+1}`);
+        savedNames[i] = inp.value;
+      });
       localStorage.setItem("schockenPlayers", JSON.stringify(savedNames));
       scores = new Array(players.length).fill(null);
       wins = new Array(players.length).fill(0);
 
-      //document.getElementById("roundDisplay").textContent = "Runde: " + roundNumber;
       document.getElementById("setup").style.display = "none";
       document.getElementById("game").style.display = "block";
-      showPlayer(); updateDiceDisplay(); updateHistoryTable();
+      showPlayer();
+      updateDiceDisplay();
+      updateHistoryTable();
     }
 
 function toggleHoldOrConvert(index) {
