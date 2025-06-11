@@ -12,9 +12,6 @@
     .held { border-color: green; background-color: #eaffea; }
     button { padding: 12px 24px; font-size: 18px; margin: 10px; }
     input { font-size: 18px; padding: 5px 10px; margin: 5px; }
-    <label style="font-size:18px; margin-bottom:10px; display:block;">
-    <input type="checkbox" id="deckelToggle" /> Mit Deckeln spielen
-    </label>
     #result, #throwCount, #playerDisplay { font-size: 20px; margin-top: 10px; transition: color 0.2s ease;}
     #leaderboard { text-align: left; margin-top: 20px; }
     #historyTable table {
@@ -94,6 +91,9 @@
 <body>
   <h1>Schocken (Online)</h1>
   <div id="setup">
+    <label style="font-size:18px; margin-bottom:10px; display:block;">
+    <input type="checkbox" id="deckelToggle" /> Mit Deckeln spielen
+    </label>
     <div id="nameInputs"></div>
     <button onclick="addPlayer()">+ Spieler hinzufügen</button>
     <br><br>
@@ -104,7 +104,7 @@
     <div id="playerControl" style="margin-top: 20px;">
       <h1 id="playerDisplay" style="font-size: 24px; margin-bottom: 0;">Am Zug: Spieler 1</h1>
       <div style="text-align: center; margin-top: 5px;">
-      <button id="rotateBtn" onclick="rotatePlayer()" title="Nächster Spieler">🔄</button>
+      <button id="rotateBtn" onclick="rotatePlayer()" titlname="Nächster Spieler">🔄</button>
     </div>
     </div>
     <div class="dice-container">
@@ -623,26 +623,6 @@ function updateHistoryTable() {
   document.getElementById("historyTable").innerHTML = html;
 }
 
-
-    // Schleife durch alle Spieler
-    for (let j = 0; j < players.length; j++) {
-      const entry = r[j];
-      let labelClass = "";
-
-      if (entry) {
-        html += `<td class="${labelClass}">${entry.label}</td>`;
-        html += `<td class="${labelClass}" style="text-align:center;">${entry.throws}</td>`;
-      } else {
-        html += `<td class="${labelClass}"></td><td class="${labelClass}"></td>`;
-      }
-    }
-
-    html += "</tr>";
-  }
-
-  html += "</table>";
-  document.getElementById("historyTable").innerHTML = html;
-}
 
 
 function resetGame() {
