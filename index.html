@@ -186,7 +186,7 @@
       throwCount = 0;
       convertedThisTurn = false;
       convertedCount = 0;
-//check, ob mit Deckel
+    //check, ob mit Deckel
       useDeckel = document.getElementById("deckelToggle").checked;
     // dann:
       deckelCount = new Array(players.length).fill(0);
@@ -194,12 +194,12 @@
     inFinal = false;
     finalPlayers = [];
     // Und falls useDeckel: Auswürfeln abschalten
-    if (useDeckel) {
-      manualRotationMode = false;
-      document.getElementById("rotateBtn").disabled = true;
-      startPlayerIndex = 0;
-  currentPlayer = 0;
-    }
+   // if (useDeckel) {
+  // manualRotationMode = false;
+     // document.getElementById("rotateBtn").disabled = true;
+     // startPlayerIndex = 0;
+  // currentPlayer = 0;
+   //}
 
       
       players = [], roundNumber = 1, history = [[]];
@@ -309,7 +309,7 @@ function toggleHoldOrConvert(index) {
         }
 
         function endTurn() {
-            if (currentPlayer === 0 && throwCount > 0) maxThrowsThisRound = Math.min(3, throwCount);
+            if (currentPlayer === startPlayerIndex && throwCount > 0) maxThrowsThisRound = Math.min(3, throwCount);
             const score = rateRoll(dice, throwCount, currentPlayer);
             scores[currentPlayer] = score;
             history[roundNumber - 1][currentPlayer] = {
