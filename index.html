@@ -320,21 +320,42 @@ function toggleHoldOrConvert(index) {
       }
     }
 
-        function prepareNextRound() {
-            manualRotationMode = true;
-            document.getElementById("rotateBtn").disabled = false;
-            throwCount = 0; 
-            playerTurnIndex = -1;
-            scores = new Array(players.length).fill(null); dice = [null, null, null];
-            held = [false, false, false]; convertible = [false, false, false];
-            convertedThisTurn = false;
-            convertedCount = 0;
-            document.getElementById("result").textContent = "";
-            //document.getElementById("throwCount").textContent = "Wurf: 0";
-            maxThrowsThisRound = 3; history.push(new Array(players.length).fill(null)); roundNumber++;
-            document.getElementById("roundDisplay").textContent = "Runde: " + roundNumber;
-            showPlayer(); updateDiceDisplay();   
-        }
+function prepareNextRound() {
+  // nächster Startspieler = Verlierer der letzten Runde
+  currentPlayer = startPlayerIndex;
+  
+  // manuelles Drehen ausschalten (🔄-Button deaktivieren)
+  manualRotationMode = false;
+  document.getElementById("rotateBtn").disabled = true;
+
+  // Reset für den neuen Spielzug
+  throwCount = 0;
+  playerTurnIndex = -1;
+  scores = new Array(players.length).fill(null);
+  dice = [null, null, null];
+  held = [false, false, false];
+  convertible = [false, false, false];
+  convertedThisTurn = false;
+  convertedCount = 0;
+
+  // Ergebnisfeld zurücksetzen
+  document.getElementById("result").textContent = "";
+
+  // Wurfbegrenzung zurücksetzen
+  maxThrowsThisRound = 3;
+
+  // Neue Runde ins History-Array
+  history.push(new Array(players.length).fill(null));
+  
+  // Rundenzähler erhöhen und anzeigen
+  roundNumber++;
+  document.getElementById("roundDisplay").textContent = "Runde: " + roundNumber;
+
+  // Anzeige aktualisieren
+  showPlayer();
+  updateDiceDisplay();
+}
+
 
         function showPlayer() {
             document.getElementById("playerDisplay").textContent = `Am Zug: ${players[currentPlayer]}`;
