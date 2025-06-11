@@ -553,7 +553,6 @@ function getRoundWinner(round) {
 }
 
     
-
 function updateHistoryTable() {
   if (!history.length) return;
 
@@ -578,7 +577,8 @@ function updateHistoryTable() {
   html += "</tr>";
 
   // Unter-Kopfzeile mit Icons (Würfel + Wurfanzahl oder Deckel)
-  html += "<tr><th></th>";
+  // Hinweis: Kein Platzhalter-<th>, da 'Runde' rowspan=2 nutzt
+  html += "<tr>";
   players.forEach(() => {
     html += `<th>🎲</th><th>${useDeckel ? 'Deckel' : '🔁'}</th>`;
   });
