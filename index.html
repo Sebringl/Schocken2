@@ -323,6 +323,14 @@ function toggleHoldOrConvert(index) {
       playerTurnIndex++;
 //Deckel-Modus
     if (useDeckel) {
+      const list = scores
+  .map((s,i) => ({ name: players[i], playerIndex: i, ...s }))
+  .sort((a,b) => {
+    if (a.tier !== b.tier)    return b.tier    - a.tier;
+    if (a.subvalue !== b.subvalue) return b.subvalue - a.subvalue;
+    if (a.throws !== b.throws) return a.throws  - b.throws;
+    return a.playerIndex - b.playerIndex;
+  });
   // 1. Verlierer bestimmen
   const loser = list[list.length - 1].playerIndex;
   // 2. Anzahl Deckel berechnen
@@ -361,7 +369,7 @@ function toggleHoldOrConvert(index) {
     }
   }
   updateHistoryTable();
-  return; // keine prepareNextRound(), wir regeln intern
+  // keine prepareNextRound(), wir regeln intern
 }
 // … dein alter Code für Normalmodus …
 
