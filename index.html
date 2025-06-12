@@ -189,18 +189,12 @@
     //check, ob mit Deckel
       useDeckel = document.getElementById("deckelToggle").checked;
     // dann:
-      deckelCount = new Array(players.length).fill(0);
-    halfLossCount = new Array(players.length).fill(0);
-    inFinal = false;
-    finalPlayers = [];
-    // Und falls useDeckel: Auswürfeln abschalten
-   // if (useDeckel) {
-  // manualRotationMode = false;
-     // document.getElementById("rotateBtn").disabled = true;
-     // startPlayerIndex = 0;
-  // currentPlayer = 0;
-   //}
-
+      if (useDeckel) {
+      inFinal = false;
+      finalPlayers = [];
+      StartPlayerIndex = 0;
+      currentPlayer = 0;
+      }
       
       players = [], roundNumber = 1, history = [[]];
       const nameInputs = document.querySelectorAll("#nameInputs input");
@@ -212,6 +206,11 @@
       localStorage.setItem("schockenPlayers", JSON.stringify(savedNames));
       scores = new Array(players.length).fill(null);
       wins = new Array(players.length).fill(0);
+
+      if (useDeckel) {
+      deckelCount = new Array(players.length).fill(0);
+      halfLossCount = new Array(players.length).fill(0);
+      }
 
       //document.getElementById("roundDisplay").textContent = "Runde: " + roundNumber;
       document.getElementById("setup").style.display = "none";
@@ -321,58 +320,6 @@ function toggleHoldOrConvert(index) {
 
     function nextPlayer() {
       playerTurnIndex++;
-//Deckel-Modus
-    if (useDeckel) {
-      const list = scores
-  .map((s,i) => ({ name: players[i], playerIndex: i, ...s }))
-  .sort((a,b) => {
-    if (a.tier !== b.tier)    return b.tier    - a.tier;
-    if (a.subvalue !== b.subvalue) return b.subvalue - a.subvalue;
-    if (a.throws !== b.throws) return a.throws  - b.throws;
-    return a.playerIndex - b.playerIndex;
-  });
-  // 1. Verlierer bestimmen
-  const loser = list[list.length - 1].playerIndex;
-  // 2. Anzahl Deckel berechnen
-  let penalty;
-  switch (list[0].tier) {
-    case 0: penalty = 1; break;          // einfacher Wurf
-    case 1: penalty = 2; break;          // Straße
-    case 2: penalty = 3; break;          // Pasch
-    case 3: penalty = list[0].subvalue; break; // Schock X
-    case 4: penalty = 13; break;         // Schock Out
-  }
-  deckelCount[loser] += penalty;
-  // 3. Historie speichern
-  history[roundNumber-1][loser] = {
-    label: list[0].label,
-    deckels: deckelCount[loser]
-  };
-  // 4. Halbzeit-Check
-  if (deckelCount[loser] >= 13) {
-    halfLossCount[loser]++;
-    if (halfLossCount.filter(c => c>0).length < 2) {
-      alert(`Halbzeit verloren von ${players[loser]}`);
-      // Neustart der Deckel für neue Hälfte
-      deckelCount.fill(0);
-      history = [];
-      roundNumber = 1;
-    } else {
-      // Finale starten: nur Verlierer spielen weiter
-      finalPlayers = players.filter((_,i) => halfLossCount[i]>0);
-      alert(`Finale zwischen ${finalPlayers.join(" und ")}`);
-      players = finalPlayers;
-      deckelCount = new Array(players.length).fill(0);
-      history = [];
-      roundNumber = 1;
-      inFinal = true;
-    }
-  }
-  updateHistoryTable();
-  // keine prepareNextRound(), wir regeln intern
-}
-// … dein alter Code für Normalmodus …
-
       
 
       if (playerTurnIndex < players.length) {
@@ -388,62 +335,99 @@ function toggleHoldOrConvert(index) {
 
         updateDiceDisplay();
         showPlayer();
+        return;
       } else {
-        // Runde beenden
-        let list = scores.map((s, i) => ({ name: players[i], playerIndex: i, ...s }));
-
-        list.sort((a, b) => {
-          if (a.tier !== b.tier) return b.tier - a.tier;
-          if (a.subvalue !== b.subvalue) return b.subvalue - a.subvalue;
-          if (a.throws !== b.throws) return a.throws - b.throws;
-          return a.playerIndex - b.playerIndex;
-        });
-
-        wins[list[0].playerIndex]++;
-        localStorage.setItem("schockenWinner", list[0].name);
-
-        const loser = list[list.length - 1];
-        startPlayerIndex = loser.playerIndex;
-
         prepareNextRound();
         updateHistoryTable();
       }
     }
 
 function prepareNextRound() {
-  // nächster Startspieler = Verlierer der letzten Runde
-  currentPlayer = startPlayerIndex;
-  
-  // manuelles Drehen ausschalten (🔄-Button deaktivieren)
-  manualRotationMode = false;
-  document.getElementById("rotateBtn").disabled = true;
+  //–––– Straflogik oder Sieglogik ––––
+  if (useDeckel) {
+    // 1. Alle Spieler-Ergebnisse in eine Liste packen und sortieren
+    const list = scores
+      .map((s,i) => ({ playerIndex: i, ...s }))
+      .sort((a,b) => {
+        if (a.tier    !== b.tier)    return b.tier    - a.tier;
+        if (a.subvalue!== b.subvalue) return b.subvalue - a.subvalue;
+        if (a.throws  !== b.throws)  return a.throws  - b.throws;
+        return a.playerIndex - b.playerIndex;
+      });
 
-  // Reset für den neuen Spielzug
-  throwCount = 0;
-  playerTurnIndex = 0;
-  scores = new Array(players.length).fill(null);
-  dice = [null, null, null];
-  held = [false, false, false];
-  convertible = [false, false, false];
-  convertedThisTurn = false;
-  convertedCount = 0;
+    // 2. Verlierer ist das letzte Element
+    const loser = list[list.length - 1].playerIndex;
 
-  // Ergebnisfeld zurücksetzen
-  document.getElementById("result").textContent = "";
+    // 3. Penalty basierend auf dem **Gewinner**-Tier (list[0].tier) berechnen
+    let penalty;
+    switch (list[0].tier) {
+      case 0: penalty = 1;    break; // einfacher Wurf
+      case 1: penalty = 2;    break; // Straße
+      case 2: penalty = 3;    break; // Pasch
+      case 3: penalty = list[0].subvalue; break; // Schock X
+      case 4: penalty = 13;   break; // Schock Aus
+    }
 
-  // Wurfbegrenzung zurücksetzen
-  maxThrowsThisRound = 3;
+    // 4. Deckel zählen
+    deckelCount[loser] += penalty;
 
-  // Neue Runde ins History-Array
-  history.push(new Array(players.length).fill(null));
-  
-  // Rundenzähler erhöhen und anzeigen
+    // 5. History-Eintrag
+    history[roundNumber-1][loser] = {
+      label:  list[0].label,
+      deckels: deckelCount[loser]
+    };
+
+    // 6. Halbzeit/Finale-Check
+    if (deckelCount[loser] >= 13) {
+      halfLossCount[loser]++;
+      if (halfLossCount.filter(c => c>0).length < 2) {
+        alert(`Halbzeit verloren von ${players[loser]}`);
+        deckelCount.fill(0);
+        history = [ new Array(players.length).fill(null) ];
+        roundNumber = 1;
+      } else {
+        // Finale starten
+        const finalists = players.filter((_,i) => halfLossCount[i]>0);
+        alert(`Finale zwischen ${finalists.join(" und ")}`);
+        players       = finalists;
+        deckelCount   = new Array(players.length).fill(0);
+        halfLossCount = new Array(players.length).fill(0);
+        history       = [ new Array(players.length).fill(null) ];
+        roundNumber   = 1;
+        inFinal       = true;
+      }
+    }
+
+  } else {
+    // dein alter Nicht-Deckel-Modus:
+    const list = scores
+      .map((s,i) => ({ playerIndex: i, ...s }))
+      .sort(/* wie gehabt nach tier, subvalue, throws */);
+
+    // +1 Sieg für list[0].playerIndex
+    wins[list[0].playerIndex]++;
+    localStorage.setItem("schockenWinner", players[list[0].playerIndex]);
+
+    // nächster Startspieler = letzter Verlierer
+    const loser = list[list.length - 1].playerIndex;
+    startPlayerIndex = loser;
+  }
+
+  //–––– Round-Reset (gemeinsam für beide Modi) ––––
   roundNumber++;
-  document.getElementById("roundDisplay").textContent = "Runde: " + roundNumber;
+  playerTurnIndex = 0;
+  currentPlayer   = startPlayerIndex;
+  scores          = players.map(_ => ({ tier: null, subvalue: null, throws: 0 }));
+  throwCount      = 0;
+  dice            = [null, null, null];
+  held            = [false, false, false];
+  convertible     = [false, false, false];
+  convertedThisTurn = false;
+  convertedCount    = 0;
 
-  // Anzeige aktualisieren
-  showPlayer();
+  updateHistoryTable();
   updateDiceDisplay();
+  showPlayer();
 }
 
 
