@@ -413,7 +413,7 @@ function prepareNextRound() {
     const loser = list[list.length - 1].playerIndex;
     startPlayerIndex = loser;
   }
-
+  history.push(new Array(players.length).fill(null));
   //–––– Round-Reset (gemeinsam für beide Modi) ––––
   roundNumber++;
   playerTurnIndex = 0;
