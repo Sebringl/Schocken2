@@ -403,7 +403,12 @@ function prepareNextRound() {
     // dein alter Nicht-Deckel-Modus:
     const list = scores
       .map((s,i) => ({ playerIndex: i, ...s }))
-      .sort(/* wie gehabt nach tier, subvalue, throws */);
+      .sort((a,b) => {
+        if (a.tier    !== b.tier)    return b.tier    - a.tier;
+        if (a.subvalue!== b.subvalue) return b.subvalue - a.subvalue;
+        if (a.throws  !== b.throws)  return a.throws  - b.throws;
+        return a.playerIndex - b.playerIndex;
+      });
 
     // +1 Sieg für list[0].playerIndex
     wins[list[0].playerIndex]++;
@@ -417,6 +422,7 @@ function prepareNextRound() {
   //–––– Round-Reset (gemeinsam für beide Modi) ––––
   roundNumber++;
   playerTurnIndex = 0;
+  maxThrowsThisRound = 3;
   currentPlayer   = startPlayerIndex;
   scores          = players.map(_ => ({ tier: null, subvalue: null, throws: 0 }));
   throwCount      = 0;
@@ -630,7 +636,7 @@ function resetGame() {
     document.getElementById("setup").style.display = "block";
     document.getElementById("game").style.display = "none";
 
-    startPlayerIndex   = 0;
+  startPlayerIndex   = 0;
   playerTurnIndex    = 0;
   roundNumber        = 1;
   history            = [];
