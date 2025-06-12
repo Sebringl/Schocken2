@@ -374,7 +374,7 @@ function prepareNextRound() {
 
     // 5. History-Eintrag
     history[roundNumber-1][loser] = {
-      label:  list[0].label,
+      label:  list[list.length - 1].label,
       deckels: deckelCount[loser]
     };
 
