@@ -188,15 +188,16 @@
       convertedCount = 0;
     //check, ob mit Deckel
       useDeckel = document.getElementById("deckelToggle").checked;
-    // dann:
-      if (useDeckel) {
+    
+      
       inFinal = false;
       finalPlayers = [];
-      StartPlayerIndex = 0;
+      playerTurnIndex  = 0;
+      startPlayerIndex = 0;
       currentPlayer = 0;
-      }
       
-      players = [], roundNumber = 1, history = [[]];
+      
+      players = [], roundNumber = 1; history     = [ new Array(players.length).fill(null) ];
       const nameInputs = document.querySelectorAll("#nameInputs input");
       for (let i = 0; i < nameInputs.length; i++) {
         const name = nameInputs[i].value || `Spieler ${i + 1}`;
@@ -600,7 +601,7 @@ function updateHistoryTable() {
       const entry = r[p];
       if (entry) {
         html += `<td>${entry.label}</td>`;
-        html += `<td>${useDeckel ? entry.deckels : entry.throws}</td>`;
+        html += `<td>${useDeckel ? deckelCount[p] : entry.throws}</td>`;
       } else if (currentRound && p === nextPlayerInRound) {
         html += `<td colspan=\"2\" class=\"next\">…</td>`;
       } else {
@@ -629,8 +630,24 @@ function resetGame() {
     document.getElementById("setup").style.display = "block";
     document.getElementById("game").style.display = "none";
 
-    roundNumber = 0;
-    history = [];
+    startPlayerIndex   = 0;
+  playerTurnIndex    = 0;
+  roundNumber        = 1;
+  history            = [];
+  scores             = [];
+  wins               = [];
+  useDeckel          = false;
+  deckelCount        = [];
+  halfLossCount      = [];
+  inFinal            = false;
+  finalPlayers       = [];
+  maxThrowsThisRound = 3;
+  throwCount         = 0;
+  dice               = [null, null, null];
+  held               = [false, false, false];
+  convertible        = [false, false, false];
+  convertedThisTurn  = false;
+  convertedCount     = 0;
 }
     </script>
 </body>
