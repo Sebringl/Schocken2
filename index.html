@@ -137,6 +137,7 @@
         halfLossCount = [], // Anzahl verlorener Halbzeiten pro Spieler
         inFinal = false, // Ob das Spiel im Finale ist
         finalPlayers = []; // Indizes der Finalisten
+    let manualRotationMode = true; // Ob manueller Spielerwechsel erlaubt ist
 
     // Farben für Spieleranzeige (Text und Hintergrund)
     const playerTextColors = [
@@ -194,9 +195,28 @@
     // Speichert den aktuellen Spielstand im localStorage
     function saveGameState() {
       const gameState = {
-        players, scores, currentPlayer, maxThrowsThisRound, throwCount, dice, held, convertible,
-        roundNumber, history, wins, startPlayerIndex, playerTurnIndex, convertedThisTurn,
-        convertedCount, maxConvertibleThisTurn, useDeckel, deckelCount, halfLossCount, inFinal, finalPlayers
+        players,
+        scores,
+        currentPlayer,
+        maxThrowsThisRound,
+        throwCount,
+        dice,
+        held,
+        convertible,
+        roundNumber,
+        history,
+        wins,
+        startPlayerIndex,
+        playerTurnIndex,
+        convertedThisTurn,
+        convertedCount,
+        maxConvertibleThisTurn,
+        useDeckel,
+        deckelCount,
+        halfLossCount,
+        inFinal,
+        finalPlayers,
+        manualRotationMode
       };
       localStorage.setItem("schockenGameState", JSON.stringify(gameState));
     }
@@ -206,14 +226,42 @@
       const gameState = JSON.parse(localStorage.getItem("schockenGameState"));
       if (gameState) {
         if (confirm("Ein gespeichertes Spiel wurde gefunden. Möchten Sie es fortsetzen?")) {
-          Object.assign(window, gameState);
+          // Setze globale Variablen aus gespeichertem Zustand
+          players = gameState.players || [];
+          scores = gameState.scores || [];
+          currentPlayer = gameState.currentPlayer || 0;
+          maxThrowsThisRound = gameState.maxThrowsThisRound || 3;
+          throwCount = gameState.throwCount || 0;
+          dice = gameState.dice || [null, null, null];
+          held = gameState.held || [false, false, false];
+          convertible = gameState.convertible || [false, false, false];
+          roundNumber = gameState.roundNumber || 1;
+          history = gameState.history || [];
+          wins = gameState.wins || [];
+          startPlayerIndex = gameState.startPlayerIndex || 0;
+          playerTurnIndex = gameState.playerTurnIndex || 0;
+          convertedThisTurn = gameState.convertedThisTurn || false;
+          convertedCount = gameState.convertedCount || 0;
+          maxConvertibleThisTurn = gameState.maxConvertibleThisTurn || 0;
+          useDeckel = gameState.useDeckel || false;
+          deckelCount = gameState.deckelCount || [];
+          halfLossCount = gameState.halfLossCount || [];
+          inFinal = gameState.inFinal || false;
+          finalPlayers = gameState.finalPlayers || [];
+          manualRotationMode = gameState.manualRotationMode !== undefined ? gameState.manualRotationMode : true;
+
+          // Aktualisiere UI
           document.getElementById("setup").style.display = "none";
           document.getElementById("game").style.display = "block";
+          document.getElementById("deckelToggle").checked = useDeckel;
           document.getElementById("roundDisplay").textContent = `Runde: ${roundNumber}`;
           showPlayer();
           updateDiceDisplay();
           updateHistoryTable();
           return true;
+        } else {
+          // Lösche Spielstand, wenn nicht fortgesetzt
+          localStorage.removeItem("schockenGameState");
         }
       }
       return false;
@@ -265,6 +313,7 @@
       scores = players.map(_ => ({ tier: null, subvalue: null, throws: 0 }));
       wins = new Array(players.length).fill(0);
       history = [new Array(players.length).fill(null)];
+      manualRotationMode = true;
 
       if (useDeckel) {
         deckelCount = new Array(players.length).fill(0);
@@ -525,6 +574,7 @@
       convertedThisTurn = false;
       convertedCount = 0;
       maxConvertibleThisTurn = 0;
+      manualRotationMode = true;
 
       document.getElementById("roundDisplay").textContent = `Runde: ${roundNumber}`;
       updateDiceDisplay();
@@ -648,4 +698,98 @@
       }
 
       let html = "<h3>Spielverlauf</h3><table border='1' style='margin:auto; border-collapse:collapse;'>";
-      html += "<tr
+      html += "<tr><th rowspan='2'>Runde</th>";
+      players.forEach((name, i) => {
+        let displayName;
+        if (useDeckel) {
+          displayName = `${name} (${deckelCount[i]})`;
+        } else {
+          const winCount = wins[i];
+          displayName = winCount > 0 ? `${name} (${winCount} 👑)` : name;
+        }
+        html += `
+          <th colspan="2" style="color: ${playerTextColors[i]};">
+            ${displayName}
+          </th>`;
+      });
+      html += "</tr>";
+
+      html += "<tr>";
+      players.forEach(() => {
+        html += `<th>🎲</th><th>${useDeckel ? 'Deckel' : '🔁'}</th>`;
+      });
+      html += "</tr>";
+
+      for (let i = history.length - 1; i >= 0; i--) {
+        const r = history[i];
+        const winnerIndex = getRoundBestPlayerIndex(r);
+        html += `<tr><td>${i + 1}</td>`;
+        const currentRound = (i === history.length - 1);
+        let nextPlayerInRound = null;
+        if (currentRound) {
+          const allEmpty = r.every(e => !e);
+          if (allEmpty) {
+            nextPlayerInRound = currentPlayer;
+          } else {
+            for (let p = 0; p < players.length; p++) {
+              if (!r[p]) { nextPlayerInRound = p; break; }
+            }
+          }
+        }
+
+        players.forEach((_, p) => {
+          const entry = r[p];
+          const isWinner = p === winnerIndex && entry;
+          if (entry) {
+            html += `<td${isWinner ? ' class="winner"' : ''}>${entry.label}</td>`;
+            html += `<td>${useDeckel ? deckelCount[p] : entry.throws}</td>`;
+          } else if (currentRound && p === nextPlayerInRound) {
+            html += `<td colspan="2" class="next">…</td>`;
+          } else {
+            html += `<td>-</td><td>-</td>`;
+          }
+        });
+        html += "</tr>";
+      }
+
+      html += "</table>";
+      document.getElementById("historyTable").innerHTML = html;
+    }
+
+    // Setzt das Spiel zurück und entfernt gespeicherten Spielstand
+    function resetGame() {
+      localStorage.removeItem("schockenGameState");
+      const savedNames = JSON.parse(localStorage.getItem("schockenPlayers") || "[]");
+      document.body.style.backgroundColor = '#f0f0f0';
+      document.getElementById("nameInputs").innerHTML = "";
+      savedNames.forEach(name => addPlayer(name));
+
+      document.getElementById("setup").style.display = "block";
+      document.getElementById("game").style.display = "none";
+      document.getElementById("roundDisplay").textContent = `Runde: 1`;
+      document.getElementById("historyTable").innerHTML = "";
+
+      startPlayerIndex = 0;
+      playerTurnIndex = 0;
+      roundNumber = 1;
+      history = [];
+      scores = [];
+      wins = [];
+      useDeckel = false;
+      deckelCount = [];
+      halfLossCount = [];
+      inFinal = false;
+      finalPlayers = [];
+      maxThrowsThisRound = 3;
+      throwCount = 0;
+      dice = [null, null, null];
+      held = [false, false, false];
+      convertible = [false, false, false];
+      convertedThisTurn = false;
+      convertedCount = 0;
+      maxConvertibleThisTurn = 0;
+      manualRotationMode = true;
+    }
+  </script>
+</body>
+</html>
