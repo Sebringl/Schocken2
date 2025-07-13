@@ -9,6 +9,8 @@
     .dice-container { display: flex; justify-content: center; gap: 20px; margin: 20px 0; }
     .die { font-size: 130px; cursor: pointer; padding: 15px; border: 2px solid transparent; border-radius: 10px; }
     .held { border-color: green; background-color: #eaffea; }
+    /* Stil für Gewinner-Zellen in der Historien-Tabelle */
+    .winner { background-color: #fff9c4; }
     button { padding: 12px 24px; font-size: 18px; margin: 10px; }
     input { font-size: 18px; padding: 5px 10px; margin: 5px; }
     #result, #throwCount, #playerDisplay { font-size: 20px; margin-top: 10px; transition: color 0.2s ease;}
@@ -19,7 +21,6 @@
       width: 100%;
       font-size: 0.9rem;
     }
-
     #rotateBtn {
       background: none;
       border: none;
@@ -35,7 +36,6 @@
       align-items: center;
       justify-content: center;
     }
-
     #rotateBtn:disabled {
       opacity: 0.3;
       cursor: default;
@@ -43,27 +43,22 @@
     #rotateBtn:hover:not(:disabled) {
       transform: scale(1.1);
     }
-
     #historyTable th, #historyTable td {
       border: 1px solid #ccc;
       padding: 4px 8px;
       text-align: center;
       background-color: white;
     }
-
     #historyTable th {
       background-color: #e0e0e0;
       font-weight: bold;
     }
-    
     #historyTable tr:nth-child(even) {
       background-color: #f2f2f2;
     }
-
     #historyTable td {
       min-width: 60px;
     }
-
     .removeBtn {
       font-size: 16px;
       padding: 4px 10px;
@@ -75,20 +70,16 @@
       border-radius: 4px;
       cursor: pointer;
     }
-
     input[type="text"] {
       height: 34px;
       font-size: 16px;
       padding: 4px 10px;
     }
-
-    .winner {
-      background-color: #fff9c4; /* Goldener Hintergrund für Gewinner */
-    }
   </style>
 </head>
 <body>
   <h1>Schocken (Online)</h1>
+  <!-- Setup-Bereich für Spieler-Eingabe und Spielstart -->
   <div id="setup">
     <label style="font-size:18px; margin-bottom:10px; display:block;">
       <input type="checkbox" id="deckelToggle" /> Mit Deckeln spielen
@@ -99,6 +90,7 @@
     <button onclick="startGame()">Spiel starten</button>
   </div>
 
+  <!-- Spiel-Bereich, wird erst nach Spielstart angezeigt -->
   <div id="game" style="display:none;">
     <div id="playerControl" style="margin-top: 20px;">
       <h1 id="playerDisplay" style="font-size: 24px; margin-bottom: 0;">Am Zug: Spieler 1</h1>
@@ -122,20 +114,31 @@
   </div>
 
   <script>
-    let players = [], scores = [], currentPlayer = 0, maxThrowsThisRound = 3;
-    let throwCount = 0, dice = [null, null, null], held = [false, false, false], convertible = [false, false, false];
-    let diceSymbols = ['⚀', '⚁', '⚂', '⚃', '⚄', '⚅'], roundNumber = 1, history = [];
-    let wins = [];
-    let startPlayerIndex = 0, playerTurnIndex = 0;
-    let convertedThisTurn = false;
-    let convertedCount = 0;
-    let maxConvertibleThisTurn = 0;
-    let useDeckel = false;
-    let deckelCount = [];
-    let halfLossCount = [];
-    let inFinal = false;
-    let finalPlayers = [];
+    // Globale Spielvariablen
+    let players = [], // Liste der Spielernamen
+        scores = [], // Punktzahlen der Spieler
+        currentPlayer = 0, // Index des aktuellen Spielers
+        maxThrowsThisRound = 3; // Maximale Würfe pro Runde
+    let throwCount = 0, // Anzahl der Würfe im aktuellen Zug
+        dice = [null, null, null], // Werte der drei Würfel
+        held = [false, false, false], // Ob Würfel gehalten sind
+        convertible = [false, false, false]; // Ob Würfel (Sechser) konvertierbar sind
+    let diceSymbols = ['⚀', '⚁', '⚂', '⚃', '⚄', '⚅'], // Unicode-Symbole für Würfel
+        roundNumber = 1, // Aktuelle Runde
+        history = []; // Spielverlauf (Würfe und Deckel pro Runde)
+    let wins = []; // Anzahl der Runden-Gewinne pro Spieler
+    let startPlayerIndex = 0, // Index des Spielers, der die Runde startet
+        playerTurnIndex = 0; // Index des aktuellen Spielers in der Runde
+    let convertedThisTurn = false, // Ob in diesem Zug konvertiert wurde
+        convertedCount = 0, // Anzahl der Konvertierungen in diesem Zug
+        maxConvertibleThisTurn = 0; // Maximale erlaubte Konvertierungen
+    let useDeckel = false, // Ob im Deckel-Modus gespielt wird
+        deckelCount = [], // Deckel pro Spieler
+        halfLossCount = [], // Anzahl verlorener Halbzeiten pro Spieler
+        inFinal = false, // Ob das Spiel im Finale ist
+        finalPlayers = []; // Indizes der Finalisten
 
+    // Farben für Spieleranzeige (Text und Hintergrund)
     const playerTextColors = [
       '#e6194b', '#4363d8', '#f58231', '#911eb4',
       '#46f0f0', '#f032e6', '#bcf60c', '#fabebe', '#008080'
@@ -145,22 +148,24 @@
       '#e5ffff', '#ffe5f5', '#f5ffe5', '#fff0e5', '#e5f5ff'
     ];
 
+    // Zeigt eine Fehlermeldung in Rot an
     function showError(message) {
       const result = document.getElementById("result");
       result.textContent = message;
       result.style.color = "red";
     }
 
+    // Zeigt eine neutrale Nachricht in Schwarz an
     function showMessage(message) {
       const result = document.getElementById("result");
       result.textContent = message;
       result.style.color = "black";
     }
 
+    // Fügt ein Eingabefeld für einen neuen Spieler hinzu
     function addPlayer(name = "") {
       const index = document.querySelectorAll("#nameInputs .playerEntry").length;
       const container = document.getElementById("nameInputs");
-
       const div = document.createElement("div");
       div.className = "playerEntry";
       div.innerHTML = `
@@ -170,12 +175,14 @@
       container.appendChild(div);
     }
 
+    // Entfernt ein Spieler-Eingabefeld
     function removePlayer(button) {
       const entry = button.parentElement;
       entry.remove();
       rebuildPlayerInputLabels();
     }
 
+    // Aktualisiert die IDs der Spieler-Eingabefelder nach Entfernung
     function rebuildPlayerInputLabels() {
       const entries = document.querySelectorAll("#nameInputs .playerEntry");
       entries.forEach((entry, i) => {
@@ -184,6 +191,7 @@
       });
     }
 
+    // Speichert den aktuellen Spielstand im localStorage
     function saveGameState() {
       const gameState = {
         players, scores, currentPlayer, maxThrowsThisRound, throwCount, dice, held, convertible,
@@ -193,6 +201,7 @@
       localStorage.setItem("schockenGameState", JSON.stringify(gameState));
     }
 
+    // Lädt einen gespeicherten Spielstand aus dem localStorage
     function loadGameState() {
       const gameState = JSON.parse(localStorage.getItem("schockenGameState"));
       if (gameState) {
@@ -210,6 +219,7 @@
       return false;
     }
 
+    // Initialisiert die Seite: Lädt Spielstand oder Spielernamen
     window.onload = function() {
       if (!loadGameState()) {
         const savedNames = JSON.parse(localStorage.getItem("schockenPlayers") || "[]");
@@ -223,10 +233,12 @@
       }
     };
 
+    // Startet ein neues Spiel mit den eingegebenen Spielern
     function startGame() {
       const nameInputs = document.querySelectorAll("#nameInputs input");
       const names = Array.from(nameInputs).map((input, i) => input.value.trim() || `Spieler ${i + 1}`);
       
+      // Validierung: Mindestens zwei Spieler, eindeutige Namen
       if (names.length < 2) {
         showError("Mindestens zwei Spieler erforderlich!");
         return;
@@ -237,6 +249,7 @@
       }
 
       const savedNames = names;
+      // Initialisiere Spielvariablen
       maxThrowsThisRound = 3;
       throwCount = 0;
       convertedThisTurn = false;
@@ -260,6 +273,7 @@
 
       localStorage.setItem("schockenPlayers", JSON.stringify(savedNames));
       saveGameState();
+      // Zeige Spielbereich und aktualisiere UI
       document.getElementById("setup").style.display = "none";
       document.getElementById("game").style.display = "block";
       document.getElementById("roundDisplay").textContent = `Runde: ${roundNumber}`;
@@ -268,6 +282,7 @@
       updateHistoryTable();
     }
 
+    // Wechselt Halten/Konvertieren für einen Würfel
     function toggleHoldOrConvert(index) {
       if (dice[index] === null) {
         showError("Bitte würfeln Sie zuerst!");
@@ -276,6 +291,7 @@
 
       const remainingThrows = maxThrowsThisRound - throwCount;
 
+      // Konvertiere Sechs in Eins, wenn möglich
       if (dice[index] === 6 && !held[index] && convertible[index]) {
         if (remainingThrows <= 0) {
           showError("In der letzten Wurfrunde dürfen keine Sechsen mehr getauscht werden.");
@@ -286,7 +302,7 @@
         const maxAllowed = sixCount === 3 ? 2 : 1;
 
         if (convertedCount >= maxConvertibleThisTurn) {
-          held[index] = true;
+          held[index] = true; // Halte Sechs, wenn Konvertierung nicht möglich
           updateDiceDisplay();
           return;
         }
@@ -295,25 +311,29 @@
         convertible[index] = false;
         convertedCount++;
         convertedThisTurn = true;
-        applyManualSixRule(dice, held);
+        applyManualSixRule(dice, held); // Aktualisiere konvertierbare Würfel
         updateDiceDisplay();
         return;
       }
 
+      // Halte Sechs, wenn nicht konvertierbar
       if (dice[index] === 6 && !convertible[index]) {
         held[index] = !held[index];
         updateDiceDisplay();
         return;
       }
 
+      // Halte oder löse anderen Würfel
       held[index] = !held[index];
       updateDiceDisplay();
     }
 
+    // Generiert einen zufälligen Würfelwert (1-6)
     function rollDie() {
       return Math.floor(Math.random() * 6) + 1;
     }
 
+    // Würfelt nicht gehaltene Würfel
     function rollDice() {
       manualRotationMode = false;
       document.getElementById("rotateBtn").disabled = true;
@@ -339,6 +359,7 @@
       }
     }
 
+    // Bestimmt, welche Sechser konvertierbar sind (mindestens zwei frische Sechser)
     function applyManualSixRule(dice, held) {
       convertible = [false, false, false];
       const freshSixes = [];
@@ -357,12 +378,14 @@
       }
     }
 
+    // Wechselt manuell zum nächsten Spieler
     function rotatePlayer() {
       if (!manualRotationMode) return;
       currentPlayer = (currentPlayer + 1) % players.length;
       showPlayer();
     }
 
+    // Beendet den Zug des aktuellen Spielers
     function endTurn() {
       if (throwCount === 0 || dice.includes(null)) {
         showError("Bitte würfeln Sie mindestens einmal, bevor Sie den Zug beenden!");
@@ -384,6 +407,7 @@
       saveGameState();
     }
 
+    // Wechselt zum nächsten Spieler oder bereitet nächste Runde vor
     function nextPlayer() {
       playerTurnIndex++;
       if (playerTurnIndex < players.length) {
@@ -405,8 +429,10 @@
       }
     }
 
+    // Bereitet die nächste Runde vor, inkl. Rundenzusammenfassung
     function prepareNextRound() {
       if (useDeckel) {
+        // Sortiere Spieler nach Punktzahl
         const list = scores
           .map((s, i) => ({ playerIndex: i, ...s }))
           .sort((a, b) => {
@@ -419,6 +445,7 @@
         const loser = list[list.length - 1].playerIndex;
         const winner = list[0].playerIndex;
         let penalty;
+        // Bestimme Strafe basierend auf der besten Punktzahl
         switch (list[0].tier) {
           case 0: penalty = 1; break;
           case 1: penalty = 2; break;
@@ -433,9 +460,11 @@
           deckels: deckelCount[loser]
         };
 
+        // Zeige Rundenzusammenfassung
         showMessage(`Runde ${roundNumber} beendet. Gewinner: ${players[winner]} (${list[0].label}). Verlierer: ${players[loser]} (+${penalty} Deckel).`);
         setTimeout(() => showMessage(""), 3000);
 
+        // Prüfe, ob ein Spieler 13+ Deckel hat
         if (deckelCount[loser] >= 13) {
           halfLossCount[loser]++;
           if (halfLossCount.filter(c => c > 0).length < 2) {
@@ -444,6 +473,7 @@
             history = [new Array(players.length).fill(null)];
             roundNumber = 1;
           } else {
+            // Starte Finale mit Spielern, die eine Halbzeit verloren haben
             finalPlayers = players.reduce((acc, _, i) => {
               if (halfLossCount[i] > 0) acc.push(i);
               return acc;
@@ -461,6 +491,7 @@
           }
         }
       } else {
+        // Sortiere Spieler nach Punktzahl (ohne Deckel)
         const list = scores
           .map((s, i) => ({ playerIndex: i, ...s }))
           .sort((a, b) => {
@@ -474,11 +505,13 @@
         localStorage.setItem("schockenWinner", players[list[0].playerIndex]);
         const loser = list[list.length - 1].playerIndex;
         const winner = list[0].playerIndex;
+        // Zeige Rundenzusammenfassung
         showMessage(`Runde ${roundNumber} beendet. Gewinner: ${players[winner]} (${list[0].label}).`);
         setTimeout(() => showMessage(""), 3000);
         startPlayerIndex = loser;
       }
 
+      // Initialisiere nächste Runde
       history.push(new Array(players.length).fill(null));
       roundNumber++;
       playerTurnIndex = 0;
@@ -499,6 +532,7 @@
       saveGameState();
     }
 
+    // Aktualisiert die Anzeige des aktuellen Spielers
     function showPlayer() {
       document.getElementById("playerDisplay").textContent = `Am Zug: ${players[currentPlayer]}`;
       document.getElementById("playerDisplay").style.color = playerTextColors[currentPlayer];
@@ -512,6 +546,7 @@
       document.getElementById("rotateBtn").disabled = false;
     }
 
+    // Aktualisiert die Anzeige der Würfel und Buttons
     function updateDiceDisplay() {
       for (let i = 0; i < 3; i++) {
         const el = document.getElementById(`die${i}`);
@@ -537,6 +572,7 @@
       document.getElementById("throwCount").textContent = `Wurf: ${throwCount}`;
     }
 
+    // Bewertet den aktuellen Wurf
     function rateRoll(dice, throws, playerIndex) {
       dice = dice.slice().sort((x, y) => y - x);
       const [a, b, c] = dice;
@@ -581,6 +617,7 @@
       };
     }
 
+    // Ermittelt den Index des besten Spielers einer Runde
     function getRoundBestPlayerIndex(round) {
       const entries = round
         .map((entry, i) => ({ ...entry, index: i }))
@@ -598,10 +635,12 @@
       return entries[0].index;
     }
 
+    // Alias für getRoundBestPlayerIndex
     function getRoundWinner(round) {
       return getRoundBestPlayerIndex(round);
     }
 
+    // Aktualisiert die Historien-Tabelle mit Gewinner-Markierung
     function updateHistoryTable() {
       if (!history.length) {
         document.getElementById("historyTable").innerHTML = "";
@@ -609,96 +648,4 @@
       }
 
       let html = "<h3>Spielverlauf</h3><table border='1' style='margin:auto; border-collapse:collapse;'>";
-      html += "<tr><th rowspan='2'>Runde</th>";
-      players.forEach((name, i) => {
-        let displayName;
-        if (useDeckel) {
-          displayName = `${name} (${deckelCount[i]})`;
-        } else {
-          const winCount = wins[i];
-          displayName = winCount > 0 ? `${name} (${winCount} 👑)` : name;
-        }
-        html += `
-          <th colspan="2" style="color: ${playerTextColors[i]};">
-            ${displayName}
-          </th>`;
-      });
-      html += "</tr>";
-
-      html += "<tr>";
-      players.forEach(() => {
-        html += `<th>🎲</th><th>${useDeckel ? 'Deckel' : '🔁'}</th>`;
-      });
-      html += "</tr>";
-
-      for (let i = history.length - 1; i >= 0; i--) {
-        const r = history[i];
-        const winnerIndex = getRoundBestPlayerIndex(r);
-        html += `<tr><td>${i + 1}</td>`;
-        const currentRound = (i === history.length - 1);
-        let nextPlayerInRound = null;
-        if (currentRound) {
-          const allEmpty = r.every(e => !e);
-          if (allEmpty) {
-            nextPlayerInRound = currentPlayer;
-          } else {
-            for (let p = 0; p < players.length; p++) {
-              if (!r[p]) { nextPlayerInRound = p; break; }
-            }
-          }
-        }
-
-        players.forEach((_, p) => {
-          const entry = r[p];
-          const isWinner = p === winnerIndex && entry;
-          if (entry) {
-            html += `<td${isWinner ? ' class="winner"' : ''}>${entry.label}</td>`;
-            html += `<td>${useDeckel ? deckelCount[p] : entry.throws}</td>`;
-          } else if (currentRound && p === nextPlayerInRound) {
-            html += `<td colspan="2" class="next">…</td>`;
-          } else {
-            html += `<td>-</td><td>-</td>`;
-          }
-        });
-        html += "</tr>";
-      }
-
-      html += "</table>";
-      document.getElementById("historyTable").innerHTML = html;
-    }
-
-    function resetGame() {
-      localStorage.removeItem("schockenGameState"); // Entferne gespeicherten Spielstand
-      const savedNames = JSON.parse(localStorage.getItem("schockenPlayers") || "[]");
-      document.body.style.backgroundColor = '#f0f0f0';
-      document.getElementById("nameInputs").innerHTML = "";
-      savedNames.forEach(name => addPlayer(name));
-
-      document.getElementById("setup").style.display = "block";
-      document.getElementById("game").style.display = "none";
-      document.getElementById("roundDisplay").textContent = `Runde: 1`;
-      document.getElementById("historyTable").innerHTML = "";
-
-      startPlayerIndex = 0;
-      playerTurnIndex = 0;
-      roundNumber = 1;
-      history = [];
-      scores = [];
-      wins = [];
-      useDeckel = false;
-      deckelCount = [];
-      halfLossCount = [];
-      inFinal = false;
-      finalPlayers = [];
-      maxThrowsThisRound = 3;
-      throwCount = 0;
-      dice = [null, null, null];
-      held = [false, false, false];
-      convertible = [false, false, false];
-      convertedThisTurn = false;
-      convertedCount = 0;
-      maxConvertibleThisTurn = 0;
-    }
-  </script>
-</body>
-</html>
+      html += "<tr
