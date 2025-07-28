@@ -70,6 +70,10 @@
       border-radius: 4px;
       cursor: pointer;
     }
+    .lowest-score {
+    background-color: #ffeb3b;
+    font-weight: bold;
+    }
     input[type="text"] {
       height: 34px;
       font-size: 16px;
@@ -93,7 +97,7 @@
   <!-- Spiel-Bereich, wird erst nach Spielstart angezeigt -->
   <div id="game" style="display:none;">
     <div id="playerControl" style="margin-top: 20px;">
-      <h1 id="playerDisplay" style="font-size: 24px; margin-bottom: 0;">Am Zug: Spieler 1</h1>
+      <h1 id="playerDisplay" style="font-size: 30px; margin-bottom: 0;">Am Zug: Spieler 1</h1>
       <div style="text-align: center; margin-top: 5px;">
         <button id="rotateBtn" onclick="rotatePlayer()" title="Nächster Spieler">🔄</button>
       </div>
@@ -105,12 +109,12 @@
     </div>
     <button onclick="rollDice()" id="rollBtn">Würfeln</button>
     <button onclick="endTurn()" id="endTurnBtn" disabled>Zug beenden</button>
-    <button onclick="resetGame()">Neues Spiel</button>
     <div id="throwCount">Wurf: 0</div>
     <div id="roundDisplay" style="margin-top:10px; font-weight:bold;">Runde: 1</div>
     <div id="result"></div>
     <div id="leaderboard"></div>
     <div id="historyTable" style="margin-top: 20px;"></div>
+    <button onclick="resetGame()">Neues Spiel</button>
   </div>
 
   <script>
