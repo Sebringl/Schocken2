@@ -107,14 +107,14 @@
       <div class="die" id="die1" onclick="toggleHoldOrConvert(1)">⚀</div>
       <div class="die" id="die2" onclick="toggleHoldOrConvert(2)">⚀</div>
     </div>
-    <button onclick="rollDice()" id="rollBtn">Würfeln</button>
-    <button onclick="endTurn()" id="endTurnBtn" disabled>Zug beenden</button>
+    <div><button onclick="rollDice()" id="rollBtn">Würfeln</button></div>
+    <div><button onclick="endTurn()" id="endTurnBtn" disabled>Zug beenden</button></div>
     <div id="throwCount">Wurf: 0</div>
     <div id="roundDisplay" style="margin-top:10px; font-weight:bold;">Runde: 1</div>
     <div id="result"></div>
     <div id="leaderboard"></div>
     <div id="historyTable" style="margin-top: 20px;"></div>
-    <button onclick="resetGame()" style="margin-top: 20px">Neues Spiel</button>
+    <div><button onclick="resetGame()" style="margin-top: 20px">Neues Spiel</button></div>
   </div>
 
   <script>
